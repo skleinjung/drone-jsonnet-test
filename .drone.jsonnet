@@ -1,4 +1,4 @@
-local environment = import '.drone/environment.libsonnet';
+local environment = import 'environment.libsonnet';
 
 local Pipeline() = {
   kind: 'pipeline',
