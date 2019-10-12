@@ -38,7 +38,7 @@ local _pipelineFactory = {
 
   buildBaseStep(stepName, pipelineConfig):: {
     name: stepName,
-    environment: pipeline.environment,
+    environment: pipelineConfig.environment,
   },
 
   createStep(pipelineConfig):: function (stepName)
