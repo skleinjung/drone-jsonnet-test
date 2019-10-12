@@ -130,7 +130,7 @@ local __pipelineFactory = {
         commands: std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
       },
 
-      createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
+      createCommand(script):: std.join(' ', ['yarn', script]),
     },
   },
 };
