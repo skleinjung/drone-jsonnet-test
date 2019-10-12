@@ -23,6 +23,6 @@ function() {
   }
 
   [
-    self.CreatePipeline()
+    {}
   ]
 }
