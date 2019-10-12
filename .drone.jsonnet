@@ -13,7 +13,7 @@ local Pipeline(options = {}) = {
     {
       name: 'say-hi',
       image: 'node:10',
-//      environment: {} + environment,
+      environment: if std.objectHas(options, 'environment') then options.environment else {},
       commands: [
         'echo ">>> Hello, $${GREETEE_NAME}!"'
       ],
