@@ -5,10 +5,14 @@ local pipelines = [
     },
     steps: {
       generic: {
-        image: 'node:8',
         environment: {
           GREETEE_NAME: 'generic override',
         },
+        commands: [
+          'echo ">>> Hello, $${GREETEE_NAME}!"'
+        ],
+      },
+      override: {
         commands: [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
@@ -26,7 +30,10 @@ local _pipelineFactory = {
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
+    steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
+
+  isConfigurationValid(configuration):: true,
 
 //  createStep(stepsConfig):: function(stepName) stepsConfig[stepName] + {
 //    name: stepName,
@@ -38,6 +45,7 @@ local _pipelineFactory = {
 
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
+    local validConfiguration = std.assertEqual(_pipelineFactory.isConfigurationValid(config), true),
 
     kind: 'pipeline',
     name: config.name,
