@@ -3,6 +3,9 @@ local pipelines(steps) = [
     environment: {
       GREETEE_NAME: 'default name',
     },
+    npmPublishConfig: {
+      tokenSecretName: 'NPM_PUBLISH_TOKEN',
+    },
     steps: [
       steps.custom('generic', {
         image: 'node',
@@ -46,34 +49,26 @@ local __pipelineFactory = {
         then (if (std.objectHas(step, 'config')) then step.config else {}) + step.builder(pipelineConfig)
         else {},
 
+  getInitSteps(pipelineConfig)::
+    if std.objectHas(pipelineConfig, npmPublishConfig) then
+    [{
+      name: 'npm-auth',
+      image: 'robertstettner/drone-npm-auth',
+      settings: {
+        token: {
+          from_secret: pipelineConfig.npmPublishConfig.tokenSecretName,
+        }
+      },
+    }] else [],
+
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
 
     kind: 'pipeline',
     name: config.name,
     steps: std.flattenArrays([
-//      [
-//        {
-//          name: 'npm-auth',
-//          image: 'robertstettner/drone-npm-auth',
-//          settings: {
-//            token: {
-//              from_secret: 'NPM_PUBLISH_TOKEN',
-//            }
-//          },
-//        },
-//      ], // std.objectFields(o)
+      __pipelineFactory.getInitSteps(config),
       std.map(__pipelineFactory.createStep(config), config.steps)
-//      [
-//        {
-//          name: 'say-hi',
-//          image: config.nodeImage,
-//          environment: config.environment,
-//          commands: [
-//            'echo ">>> Hello, $${GREETEE_NAME}!"'
-//          ],
-//        },
-//      ],
     ]),
   },
 
