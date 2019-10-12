@@ -4,7 +4,7 @@ local createPipelines(steps) = [
       GREETEE_NAME: 'default name',
     },
     git: {
-      authorName: 'Mary Sue',
+      random: 'rabor',
     },
 //    npmPublish: {
 //      tokenSecretName: 'NPM_PUBLISH_TOKEN',
@@ -70,7 +70,7 @@ local __pipelineFactory = {
         name: 'init-git',
         image: 'bitnami/git:latest',
         commands: [
-          'git --version',
+          'echo >>> Initializing git user information...',
           'git config --global user.email "' + authorEmail + '"',
           'git config --global user.name "' + authorName + '"',
         ],
