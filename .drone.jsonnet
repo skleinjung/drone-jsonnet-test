@@ -1,10 +1,10 @@
 local pipelines = [
-  node.createPipeline({
+  $.node.createPipeline({
     environment: {
       GREETEE_NAME: 'guyo',
     },
   }),
-  node.createPipeline({
+  $.node.createPipeline({
     name: 'pipeline-2',
     environment: {
       GREETEE_NAME: 'guyo',
