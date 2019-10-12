@@ -88,4 +88,4 @@ local _pipelineFactory = {
   },
 };
 
-std.map(_pipelineFactory.createPipeline, pipelines(_pipelineFactory.stepBuilder))
+std.map(_pipelineFactory.createPipeline, pipelines(_pipelineFactory.stepConfigBuilder))
