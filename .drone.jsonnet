@@ -1,5 +1,5 @@
 local environment = [
-  { GREETEE_NAME: 'Sean' },
+  ['GREETEE_NAME', 'Sean'],
 ];
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
