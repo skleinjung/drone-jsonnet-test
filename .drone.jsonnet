@@ -1,4 +1,4 @@
-local pipelines(steps) = [
+local createPipelines(steps) = [
   {
     environment: {
       GREETEE_NAME: 'default name',
@@ -96,12 +96,12 @@ local __pipelineFactory = {
         commands: std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
       },
 
-      createCommand(script):: 'echo ">>> yarn ' + script + '"',
+      createCommand(script):: ['echo', 'yarn', script].join(' ', )
     },
   },
 };
 
-std.map(__pipelineFactory.createPipeline, pipelines({
+std.map(__pipelineFactory.createPipeline, createPipelines({
   custom: __pipelineFactory.configBuilders.custom.getStepConfig,
   yarn: __pipelineFactory.configBuilders.yarn.getStepConfig,
 }))
