@@ -33,7 +33,6 @@ local _pipelineFactory = {
 //  },
 
   createStep(stepName):: {
-    [std.trace('err:' + stepName, null)]:: null,
     name: stepName,
   },
 
@@ -55,6 +54,11 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
+      [
+        {
+          name: 'foo'
+        }
+      ],
       if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep, std.objectFields(config.steps)) else [],
 //      [
 //        {
