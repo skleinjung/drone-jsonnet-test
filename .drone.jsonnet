@@ -1,6 +1,6 @@
 local configuration = {
   environment: {
-    GREETEE_NAME: 'hombre',
+    GREETEE_NAME: 'Mensch',
   },
 };
 
@@ -9,14 +9,20 @@ local configuration = {
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local _helpers = {
-  CreatePipeline(configuration = {}): {
+  WithDefaults(configuration = {}): {
+    environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
+  },
+
+  CreatePipeline(passedConfiguration = {}): {
+    local config = self.WithDefaults(passedConfiguration),
+
     kind: 'pipeline',
     name: 'default',
     steps: [
       {
         name: 'say-hi',
         image: 'node:10',
-        environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
+        environment: config.environment,
         commands: [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
