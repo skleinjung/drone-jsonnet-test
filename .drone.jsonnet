@@ -19,7 +19,7 @@ local pipelines(stepBuilder) = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       },
-      build: stepBuilder.yarn(['install', 'bootstrap', 'build'])
+      build: stepBuilder.yarn(['install $${GREETEE_NAME}', 'bootstrap', 'build'])
     }
   },
 ];
@@ -38,6 +38,7 @@ local _pipelineFactory = {
 
   createStep(pipelineConfig):: function (stepName)
     { name: stepName } +
+    if (std.objectHas(pipelineConfig.steps[stepName], '__config')) then pipelineConfig.steps[stepName].__config else {} +
     if (std.objectHas(pipelineConfig.steps[stepName], '__builder'))
       then pipelineConfig.steps[stepName].__builder(pipelineConfig, pipelineConfig.steps[stepName])
       else pipelineConfig.steps[stepName],
@@ -82,7 +83,7 @@ local _pipelineFactory = {
         __scripts: scripts,
       },
 
-      buildStep(pipelineConfig, stepConfig): stepConfig.__config + {
+      buildStep(pipelineConfig, stepConfig): {
         image: pipelineConfig.nodeImage,
         commands: std.map(_pipelineFactory.configBuilders.yarn.createCommand, stepConfig.__scripts),
       },
