@@ -55,6 +55,7 @@ local __pipelineFactory = {
         commands: [
           'git --version',
           "git log -1 --pretty=format:'%an'",
+          "git log -1 --pretty=format:'%ae'",
         ],
       },
     ],
