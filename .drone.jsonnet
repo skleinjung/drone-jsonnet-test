@@ -38,14 +38,19 @@ local _pipelineFactory = {
 
   isConfigurationValid(configuration):: true,
 
+  createTypeSpecificStepConfiguration(stepConfig, type)::
+    if type == 'yarn' then {
+      image: 'node',
+      commands: stepConfig.commands
+    } else null,
+
   createStep(stepConfigs):: function (stepName) stepConfigs[stepName]
     + {
       name: stepName,
     }
-    + if stepConfigs[stepName].type == 'yarn' then {
-      image: 'node',
-      commands: stepConfigs[stepName].commands
-    } else {},
+    + if (std.objectHas(stepConfigs[stepName], 'type') )
+        then createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
+        else null,
 
   stepConfigBuilder: {
     yarn(commands, config = {}): {
