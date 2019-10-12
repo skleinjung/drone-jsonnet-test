@@ -47,17 +47,26 @@ local __pipelineFactory = {
         then (if (std.objectHas(step, 'config')) then step.config else {}) + step.builder(pipelineConfig)
         else {},
 
-  getInitSteps(pipelineConfig)::
-    if std.objectHas(pipelineConfig, 'npmPublishConfig') then
-    [{
-      name: 'npm-auth',
-      image: 'robertstettner/drone-npm-auth',
-      settings: {
-        token: {
-          from_secret: pipelineConfig.npmPublishConfig.tokenSecretName,
-        }
+  getInitSteps(pipelineConfig):: std.flattenArrays([
+    [
+      {
+        name: 'init-git',
+        image: 'bitnami/git:latest',
+        command: 'echo HELLO WORLD',
       },
-    }] else [],
+    ],
+    if std.objectHas(pipelineConfig, 'npmPublishConfig') then [
+      {
+        name: 'init-npm-auth',
+        image: 'robertstettner/drone-npm-auth',
+        settings: {
+          token: {
+            from_secret: pipelineConfig.npmPublishConfig.tokenSecretName,
+          }
+        },
+      }
+    ] else [],
+  ]),
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
