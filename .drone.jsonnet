@@ -12,12 +12,12 @@ local pipelines = [
   },
 ];
 
-// !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
+// !!! BEGIN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local _pipelineFactory = {
-  _withDefaults(configuration = {}): {
+  withDefaults(configuration = {}): {
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
   },
