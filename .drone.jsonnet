@@ -98,10 +98,7 @@ local __pipelineFactory = {
 
     kind: 'pipeline',
     name: config.name,
-    steps: std.flattenArrays([
-      __pipelineFactory.getInitSteps(config),
-      std.map(__pipelineFactory.createStep(config), config.steps)
-    ]),
+    steps: __pipelineFactory.getInitSteps(config) + std.map(__pipelineFactory.createStep(config), config.steps),
   },
 
   configBuilders:: {
