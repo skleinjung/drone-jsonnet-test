@@ -1,8 +1,4 @@
-local configuration = {
-  environment: {
-    GREETEE_NAME: 'Mensch',
-  },
-};
+
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
