@@ -54,7 +54,7 @@ local __pipelineFactory = {
         image: 'bitnami/git:latest',
         commands: [
           'git --version',
-          'git status',
+          "git log -1 --pretty=format:'%an'",
         ],
       },
     ],
