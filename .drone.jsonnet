@@ -70,7 +70,7 @@ local __pipelineFactory = {
         name: 'init-git',
         image: 'bitnami/git:latest',
         commands: [
-          '# ">>> Initializing git user information..."',
+          ': ">>> Initializing git user information..."',
           'git config --global user.email "' + authorEmail + '"',
           'git config --global user.name "' + authorName + '"',
         ],
