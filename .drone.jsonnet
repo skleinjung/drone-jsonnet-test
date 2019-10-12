@@ -61,7 +61,7 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-      std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps))
+      std.map(_pipelineFactory.createStep(config), std.objectFields(config.steps))
 //      [
 //        {
 //          name: 'say-hi',
