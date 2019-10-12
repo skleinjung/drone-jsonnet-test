@@ -32,8 +32,9 @@ local _pipelineFactory = {
 //    name: stepName,
 //  },
 
-  createStep(stepConfigs):: function (stepName) stepConfigs[stepName] + {
+  createStep(stepConfigs):: function (stepName) {
     name: stepName,
+    image: 'node',
   },
 
   createPipeline(configuration = {}): {
