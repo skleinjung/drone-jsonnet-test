@@ -4,6 +4,12 @@ local pipelines = [
       GREETEE_NAME: 'guyo',
     },
   }),
+  node.createPipeline({
+    name: 'pipeline-2',
+    environment: {
+      GREETEE_NAME: 'guyo',
+    },
+  }),
 ];
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
