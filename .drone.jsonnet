@@ -8,10 +8,7 @@ local createPipelines(steps) = [
 //    },
     steps: [
       steps.custom('generic', {
-        image: 'node',
-        commands: [
-          'echo ">>> Hello, $${GREETEE_NAME}!"'
-        ],
+        commands: ['echo ">>> Hello, $${GREETEE_NAME}!"'],
       }),
       steps.custom('generic-with-custom-environment', {
         image: 'node',
