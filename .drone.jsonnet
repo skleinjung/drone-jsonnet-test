@@ -56,7 +56,7 @@ local _pipelineFactory = {
 //      ], // std.objectFields(o)
       [
         {
-          name: std.join(['a', 'b']),
+          name: std.join('-', ['a', 'b']),
           image: 'node',
         },
       ],
