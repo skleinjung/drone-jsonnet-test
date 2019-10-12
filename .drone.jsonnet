@@ -1,10 +1,17 @@
-local pipelines = [
+local pipelines(steps) = [
   {
     environment: {
-      GREETEE_NAME: 'other one',
+      GREETEE_NAME: 'default name',
     },
     steps: {
       generic: {
+        image: 'node',
+        commands: [
+          'echo ">>> Hello, $${GREETEE_NAME}!"'
+        ],
+      },
+      'generic-with-custom-environment': {
+        image: 'node',
         environment: {
           GREETEE_NAME: 'generic override',
         },
@@ -12,11 +19,7 @@ local pipelines = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       },
-      override: {
-        commands: [
-          'echo ">>> Hello, $${GREETEE_NAME}!"'
-        ],
-      },
+      build: steps.yarn(['install', 'bootstrap', 'build'])
     }
   },
 ];
@@ -35,13 +38,21 @@ local _pipelineFactory = {
 
   isConfigurationValid(configuration):: true,
 
-//  createStep(stepsConfig):: function(stepName) stepsConfig[stepName] + {
-//    name: stepName,
-//  },
+  createStep(stepConfigs):: function (stepName) stepConfigs[stepName]
+    + {
+      name: stepName,
+    }
+    + if stepConfig.type == 'yarn' then {
+      image: 'node',
+      commands: stepConfigs[stepName].commands
+    } else {},
 
-  createStep(stepConfigs):: function (stepName) stepConfigs[stepName] + {
-    name: stepName,
-    image: 'node',
+  stepConfigBuilder: {
+    yarn(commands, config): {
+      type: 'yarn',
+      config: config,
+      commands: commands,
+    },
   },
 
   createPipeline(configuration = {}): {
@@ -77,4 +88,4 @@ local _pipelineFactory = {
   },
 };
 
-std.map(_pipelineFactory.createPipeline, pipelines)
+std.map(_pipelineFactory.createPipeline, pipelines(_pipelineFactory.stepBuilder))
