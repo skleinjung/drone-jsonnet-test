@@ -5,7 +5,6 @@ local createPipelines(steps) = [
     },
     git: {
       authorName: 'Mary Sue',
-      authorEmail: 'mary@example.org',
     },
 //    npmPublish: {
 //      tokenSecretName: 'NPM_PUBLISH_TOKEN',
