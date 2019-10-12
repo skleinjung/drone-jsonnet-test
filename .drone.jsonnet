@@ -49,14 +49,16 @@ local _pipelineFactory = {
       name: stepName,
     }
     + if (std.objectHas(stepConfigs[stepName], 'type'))
-        then _pipelineFactory.createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
-        else {},
+      then _pipelineFactory.createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
+      else {},
+
+  createYarnCommand(script):: 'echo ">>> yarn ' + script + '"',
 
   stepConfigBuilder: {
     yarn(commands, config = {}): {
       type: 'yarn',
       config: config,
-      commands: commands,
+      commands: std.map(_pipelineFactory.createYarnCommand, commands),
     },
   },
 
