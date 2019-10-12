@@ -3,6 +3,7 @@ local pipelines = [
     environment: {
       GREETEE_NAME: 'guyo',
     },
+    nodeImage: 'node:8',
   },
   {
     name: 'pipeline-2',
@@ -18,8 +19,9 @@ local pipelines = [
 
 local _pipelineFactory = {
   withDefaults(configuration = {}):: {
-    name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
+    name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
+    nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
   },
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
@@ -29,7 +31,7 @@ local _pipelineFactory = {
     steps: [
       {
         name: 'say-hi',
-        image: 'node:10',
+        image: config.nodeImage,
         environment: config.environment,
         commands: [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
