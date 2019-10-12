@@ -4,23 +4,20 @@
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local Pipeline(options = {}) = {
+local Pipeline() = {
   kind: 'pipeline',
   name: 'default',
   steps: [
     {
       name: 'say-hi',
       image: 'node:10',
-      environment: if std.objectHas(options, 'environment') then options.environment else {},
+      environment: if std.objectHas($, 'environment') then $.environment else {},
       commands: [
         'echo ">>> Hello, $${GREETEE_NAME}!"'
       ],
     },
   ],
 };
-
 [
-  Pipeline({
-    environment: environment,
-  }),
+  Pipeline(),
 ]
