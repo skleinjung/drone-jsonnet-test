@@ -33,6 +33,20 @@ function () {
   }
 
   [
-     _helpers.CreatePipeline($.configuration)
+     {
+           local config = _helpers.WithDefaults(passedConfiguration),
+
+           kind: 'pipeline',
+           name: 'default',
+           steps: [
+             {
+               name: 'say-hi',
+               image: 'node:10',
+               commands: [
+                 'echo ">>> Hello, $${GREETEE_NAME}!"'
+               ],
+             },
+           ],
+         }
   ]
 }
