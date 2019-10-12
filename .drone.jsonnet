@@ -23,7 +23,7 @@ local _pipelineFactory = {
   },
 
   createPipeline(configuration = {}): {
-    local config = _pipelineFactory.WithDefaults(configuration),
+    local config = _pipelineFactory.withDefaults(configuration),
 
     kind: 'pipeline',
     name: config.name,
