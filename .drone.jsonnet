@@ -6,7 +6,7 @@ local environment = {
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local Pipeline(options) = {
+local Pipeline(options = {}) = {
   kind: 'pipeline',
   name: 'default',
   steps: [
