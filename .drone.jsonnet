@@ -14,7 +14,7 @@ local _helpers = {
   },
 
   CreatePipeline(passedConfiguration = {}): {
-    local config = self.WithDefaults(passedConfiguration),
+    local config = helpers.WithDefaults(passedConfiguration),
 
     kind: 'pipeline',
     name: 'default',
