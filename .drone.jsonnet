@@ -36,13 +36,11 @@ local _pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
-  createStep(pipelineConfig):: function (stepName) pipelineConfig.steps[stepName]
-    + {
-      name: stepName,
-    }
-    + if (std.objectHas(pipelineConfig.steps[stepName], '__builder'))
+  createStep(pipelineConfig):: function (stepName)
+    { name: stepName } +
+    if (std.objectHas(pipelineConfig.steps[stepName], '__builder'))
       then pipelineConfig.steps[stepName].__builder(pipelineConfig, pipelineConfig.steps[stepName])
-      else {},
+      else pipelineConfig.steps[stepName],
 
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
