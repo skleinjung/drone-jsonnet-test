@@ -6,7 +6,7 @@ local environment = {
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-function() {
+local helpers = {
   CreatePipeline(): {
     kind: 'pipeline',
     name: 'default',
@@ -20,9 +20,11 @@ function() {
         ],
       },
     ],
-  }
+  },
+};
 
+function() {
   [
-    {}
+    helpers.CreatePipeline()
   ]
 }
