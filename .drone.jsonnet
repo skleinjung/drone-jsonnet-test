@@ -60,7 +60,7 @@ local _pipelineFactory = {
           image: 'node',
         },
       ],
-      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep, std.objectFields(config.steps)) else [],
+//      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep, std.objectFields(config.steps)) else [],
 //      [
 //        {
 //          name: 'say-hi',
