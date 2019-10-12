@@ -1,16 +1,16 @@
-local pipelines(stepBuilder) = [
+local pipelines(steps) = [
   {
     environment: {
       GREETEE_NAME: 'default name',
     },
-    steps: {
-      generic: {
+    steps: [
+      steps.custom('generic', {
         image: 'node',
         commands: [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
-      },
-      'generic-with-custom-environment': {
+      }),
+      steps.custom('generic-with-custom-environment', {
         image: 'node',
         environment: {
           GREETEE_NAME: 'generic override',
@@ -18,9 +18,9 @@ local pipelines(stepBuilder) = [
         commands: [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
-      },
-      build: stepBuilder.yarn(['install $${GREETEE_NAME}', 'bootstrap', 'build'])
-    }
+      }),
+      steps.yarn('build', ['install $${GREETEE_NAME}', 'bootstrap', 'build'])
+    ]
   },
 ];
 
@@ -29,6 +29,9 @@ local pipelines(stepBuilder) = [
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local __pipelineFactory = {
+  /**
+   * Apply default configurations to a pipeline config.
+   */
   withDefaults(configuration = {}):: configuration + {
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
@@ -36,17 +39,14 @@ local __pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
-  buildBaseStep(stepName, pipelineConfig):: {
-    name: stepName,
-    environment: pipelineConfig.environment,
-  },
-
-  createStep(pipelineConfig):: function (stepName)
-    local step = pipelineConfig.steps[stepName];
-    __pipelineFactory.buildBaseStep(stepName, pipelineConfig)
-      + if (std.objectHas(step, '__builder'))
-        then (if (std.objectHas(step, '__config')) then step.__config else {}) + step.__builder(pipelineConfig, step)
-        else step,
+  createStep(pipelineConfig):: function (step)
+    local step = step;
+    {
+      name: step.name,
+      environment: pipelineConfig.environment,
+    } + if (std.objectHas(step, 'builder'))
+        then (if (std.objectHas(step, 'config')) then step.config else {}) + step.builder(pipelineConfig)
+        else {},
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
@@ -65,7 +65,7 @@ local __pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-      std.map(__pipelineFactory.createStep(config), std.objectFields(config.steps))
+      std.map(__pipelineFactory.createStep(config), config.steps)
 //      [
 //        {
 //          name: 'say-hi',
@@ -79,16 +79,32 @@ local __pipelineFactory = {
     ]),
   },
 
+  stepConfig:: {
+    name: '',
+    config: {},
+    typeOptions: {}
+  },
+
   configBuilders:: {
-    yarn:: {
-      buildConfig(scripts, config = {}): {
-        __type: 'yarn',
-        __builder: __pipelineFactory.configBuilders.yarn.buildStep,
-        __config: config,
-        __scripts: scripts,
+    custom: {
+      getStepConfig(name, config = {}): {
+        name: name,
+        config: config,
+        builder: __pipelineFactory.configBuilders.custom.buildStep,
       },
 
-      buildStep(pipelineConfig, stepConfig): {
+      // use provided configuration, without augmenting it
+      buildStep(pipelineConfig): {},
+    },
+
+    yarn: {
+      getStepConfig(name, scripts, config = {}): {
+        name: name,
+        config: config,
+        builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }),
+      },
+
+      buildStep(stepConfig): function (pipelineConfig) {
         image: pipelineConfig.nodeImage,
         commands: std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.__scripts),
       },
@@ -99,5 +115,6 @@ local __pipelineFactory = {
 };
 
 std.map(__pipelineFactory.createPipeline, pipelines({
-  yarn: __pipelineFactory.configBuilders.yarn.buildConfig,
+  custom: __pipelineFactory.configBuilders.custom.getStepConfig,
+  yarn: __pipelineFactory.configBuilders.yarn.getStepConfig,
 }))
