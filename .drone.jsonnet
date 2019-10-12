@@ -125,7 +125,7 @@ local __pipelineFactory = {
       buildStep(stepConfig): function (pipelineConfig) {
         image: pipelineConfig.nodeImage,
         commands:
-          [': *** yarn -- running commands'] +
+          [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
           std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
       },
 
