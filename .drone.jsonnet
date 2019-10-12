@@ -13,9 +13,7 @@ local Pipeline() = {
     {
       name: 'say-hi',
       image: 'node:10',
-      environment: {
-        GREETEE_NAME: 'Drone'
-       },
+      environment: if environment then environment else {},
       commands: [
         'echo ">>> Hello, $${GREETEE_NAME}!"'
       ],
