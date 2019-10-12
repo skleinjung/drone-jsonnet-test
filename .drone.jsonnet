@@ -1,29 +1,29 @@
-local createPipelines(node) = [
-  node.createPipeline({
+local pipelines = [
+  {
     environment: {
       GREETEE_NAME: 'guyo',
     },
-  }),
-  node.createPipeline({
+  },
+  {
     name: 'pipeline-2',
     environment: {
-      GREETEE_NAME: 'guyo',
+      GREETEE_NAME: 'other one',
     },
-  }),
+  },
 ];
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local node = {
+local PipelineFactory = {
   _withDefaults(configuration = {}): {
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
   },
 
   createPipeline(configuration = {}): {
-    local config = _helpers.WithDefaults(configuration),
+    local config = PipelineFactory.node .WithDefaults(configuration),
 
     kind: 'pipeline',
     name: config.name,
@@ -40,4 +40,4 @@ local node = {
   },
 };
 
-createPipelines(node)
+std.map(PipelineFactory.createPipeline, pipelines)
