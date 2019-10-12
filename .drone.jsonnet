@@ -1,13 +1,19 @@
 local createPipelines(steps) = [
   {
+    // optional, applies to each step
     environment: {
       GREETEE_NAME: 'default name',
     },
+    // optional
     git: {
-      random: 'rabor',
+      // defaults to email of last commmitter
+      authorEmail: 'anything@example.com',
+      // defaults to name of last committer
+      authorName: 'Mary Sue',
     },
+    // optional
 //    npmPublish: {
-//      tokenSecretName: 'NPM_PUBLISH_TOKEN',
+//      tokenSecret: 'NPM_PUBLISH_TOKEN',
 //    },
     steps: [
       steps.custom('generic', {
@@ -23,7 +29,7 @@ local createPipelines(steps) = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       }),
-      steps.yarn('build', ['install $${GREETEE_NAME}', 'bootstrap', 'build'])
+      steps.yarn('build', ['install $${GREETEE_NAME}', 'bootstrap', 'build']),
     ]
   },
 ];
@@ -82,7 +88,7 @@ local __pipelineFactory = {
         image: 'robertstettner/drone-npm-auth',
         settings: {
           token: {
-            from_secret: pipelineConfig.npmPublish.tokenSecretName,
+            from_secret: pipelineConfig.npmPublish.tokenSecret,
           }
         },
       }
