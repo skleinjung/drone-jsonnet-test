@@ -56,7 +56,7 @@ local _pipelineFactory = {
 //      ], // std.objectFields(o)
       [
         {
-          name: 'foo',
+          name: std.join(std.objectFields(config.steps)),
           image: 'node',
         },
       ],
