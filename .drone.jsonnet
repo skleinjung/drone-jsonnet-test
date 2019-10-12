@@ -3,7 +3,11 @@ local createPipelines(steps) = [
     environment: {
       GREETEE_NAME: 'default name',
     },
-//    npmPublishConfig: {
+    git: {
+      authorName: 'Mary Sue',
+      authorEmail: 'mary@example.org',
+    },
+//    npmPublish: {
 //      tokenSecretName: 'NPM_PUBLISH_TOKEN',
 //    },
     steps: [
@@ -50,22 +54,36 @@ local __pipelineFactory = {
   getInitSteps(pipelineConfig):: std.flattenArrays([
     [
       {
+        local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
+        local defaultName = "`git log -1 --pretty=format:'%an'`",
+        local authorEmail =
+          if std.objectHas(pipelineConfig, 'git') then
+            if std.objectHas(pipelineConfig.git, 'authorEmail') then pipelineConfig.git.authorEmail else defaultEmail
+          else
+            defaultEmail,
+
+       local authorName =
+          if std.objectHas(pipelineConfig, 'git') then
+            if std.objectHas(pipelineConfig.git, 'authorName') then pipelineConfig.git.authorName else defaultName
+          else
+            defaultName,
+
         name: 'init-git',
         image: 'bitnami/git:latest',
         commands: [
           'git --version',
-          "git config --global user.name \"`git log -1 --pretty=format:'%an'`\"",
-          "git config --global user.email \"`git log -1 --pretty=format:'%ae'`\"",
+          'git config --global user.email "' + authorEmail + '"',
+          'git config --global user.name "' + authorName + '"',
         ],
       },
     ],
-    if std.objectHas(pipelineConfig, 'npmPublishConfig') then [
+    if std.objectHas(pipelineConfig, 'npmPublish') then [
       {
         name: 'init-npm-auth',
         image: 'robertstettner/drone-npm-auth',
         settings: {
           token: {
-            from_secret: pipelineConfig.npmPublishConfig.tokenSecretName,
+            from_secret: pipelineConfig.npmPublish.tokenSecretName,
           }
         },
       }
