@@ -1,6 +1,6 @@
 local configuration = {
   environment: {
-    GREETEE_NAME: 'person',
+    GREETEE_NAME: 'hombre',
   },
 };
 
@@ -9,7 +9,7 @@ local configuration = {
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local _helpers = {
-  CreatePipeline(): {
+  CreatePipeline(configuration = {}): {
     kind: 'pipeline',
     name: 'default',
     steps: [
@@ -26,5 +26,5 @@ local _helpers = {
 };
 
 function() [
-   _helpers.CreatePipeline(),
+   _helpers.CreatePipeline(configuration),
 ]
