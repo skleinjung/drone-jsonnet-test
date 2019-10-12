@@ -91,7 +91,7 @@ local __pipelineFactory = {
           }
         },
       }
-    else null,
+    else [],
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
