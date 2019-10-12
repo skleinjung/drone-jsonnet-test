@@ -1,6 +1,6 @@
 local environment = [
   { GREETEE_NAME: 'Sean' },
-]
+];
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
