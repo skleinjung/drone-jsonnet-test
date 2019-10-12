@@ -83,6 +83,7 @@ local __pipelineFactory = {
         ],
       },
     ] + if std.objectHas(pipelineConfig, 'npmPublish') then
+    [
       {
         name: 'init-npm-auth',
         image: 'robertstettner/drone-npm-auth',
@@ -92,7 +93,7 @@ local __pipelineFactory = {
           }
         },
       }
-    else [],
+    ] else [],
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
