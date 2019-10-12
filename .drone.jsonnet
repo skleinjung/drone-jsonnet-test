@@ -56,7 +56,7 @@ local __pipelineFactory = {
         then (if (std.objectHas(step, 'config')) then step.config else {}) + step.builder(pipelineConfig)
         else {},
 
-  getInitSteps(pipelineConfig):: std.flattenArrays([
+  getInitSteps(pipelineConfig)::
     [
       {
         local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
@@ -81,8 +81,7 @@ local __pipelineFactory = {
           'git config --global user.name "' + authorName + '"',
         ],
       },
-    ],
-    if std.objectHas(pipelineConfig, 'npmPublish') then [
+    ] + if std.objectHas(pipelineConfig, 'npmPublish') then
       {
         name: 'init-npm-auth',
         image: 'robertstettner/drone-npm-auth',
@@ -92,8 +91,7 @@ local __pipelineFactory = {
           }
         },
       }
-    ] else [],
-  ]),
+    else null,
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
