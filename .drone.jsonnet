@@ -41,7 +41,7 @@ local _pipelineFactory = {
 
     { name: stepName }
       + if (std.objectHas(step, '__builder'))
-        then if (std.objectHas(step, '__config')) then step.__config else {} + step.__builder(pipelineConfig, step)
+        then (if (std.objectHas(step, '__config')) then step.__config else {}) + step.__builder(pipelineConfig, step)
         else step,
 
   createPipeline(configuration = {}): {
