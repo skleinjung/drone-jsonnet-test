@@ -28,7 +28,7 @@ local pipelines(stepBuilder) = [
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local _pipelineFactory = {
+local __pipelineFactory = {
   withDefaults(configuration = {}):: configuration + {
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
@@ -43,13 +43,13 @@ local _pipelineFactory = {
 
   createStep(pipelineConfig):: function (stepName)
     local step = pipelineConfig.steps[stepName];
-    buildBaseStep(stepName, pipelineConfig)
+    __pipelineFactory.buildBaseStep(stepName, pipelineConfig)
       + if (std.objectHas(step, '__builder'))
         then (if (std.objectHas(step, '__config')) then step.__config else {}) + step.__builder(pipelineConfig, step)
         else step,
 
   createPipeline(configuration = {}): {
-    local config = _pipelineFactory.withDefaults(configuration),
+    local config = __pipelineFactory.withDefaults(configuration),
 
     kind: 'pipeline',
     name: config.name,
@@ -65,7 +65,7 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-      std.map(_pipelineFactory.createStep(config), std.objectFields(config.steps))
+      std.map(__pipelineFactory.createStep(config), std.objectFields(config.steps))
 //      [
 //        {
 //          name: 'say-hi',
@@ -83,14 +83,14 @@ local _pipelineFactory = {
     yarn:: {
       buildConfig(scripts, config = {}): {
         __type: 'yarn',
-        __builder: _pipelineFactory.configBuilders.yarn.buildStep,
+        __builder: __pipelineFactory.configBuilders.yarn.buildStep,
         __config: config,
         __scripts: scripts,
       },
 
       buildStep(pipelineConfig, stepConfig): {
         image: pipelineConfig.nodeImage,
-        commands: std.map(_pipelineFactory.configBuilders.yarn.createCommand, stepConfig.__scripts),
+        commands: std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.__scripts),
       },
 
       createCommand(script):: 'echo ">>> yarn ' + script + '"',
@@ -98,6 +98,6 @@ local _pipelineFactory = {
   },
 };
 
-std.map(_pipelineFactory.createPipeline, pipelines({
-  yarn: _pipelineFactory.configBuilders.yarn.buildConfig,
+std.map(__pipelineFactory.createPipeline, pipelines({
+  yarn: __pipelineFactory.configBuilders.yarn.buildConfig,
 }))
