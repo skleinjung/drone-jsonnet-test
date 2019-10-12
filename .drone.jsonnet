@@ -17,11 +17,10 @@ local pipelines = [
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local _pipelineFactory = {
-  withDefaults(configuration = {}): {
+  withDefaults(configuration = {}):: {
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
   },
-
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
 
