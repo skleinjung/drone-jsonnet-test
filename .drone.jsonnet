@@ -39,9 +39,7 @@ local __pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
-  createStep(pipelineConfig):: function (step)
-    local step = step;
-    {
+  createStep(pipelineConfig):: function (step) {
       name: step.name,
       environment: pipelineConfig.environment,
     } + if (std.objectHas(step, 'builder'))
@@ -77,12 +75,6 @@ local __pipelineFactory = {
 //        },
 //      ],
     ]),
-  },
-
-  stepConfig:: {
-    name: '',
-    config: {},
-    typeOptions: {}
   },
 
   configBuilders:: {
