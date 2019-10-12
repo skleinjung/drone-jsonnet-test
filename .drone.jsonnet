@@ -54,8 +54,8 @@ local __pipelineFactory = {
         image: 'bitnami/git:latest',
         commands: [
           'git --version',
-          "git log -1 --pretty=format:'%an'",
-          "git log -1 --pretty=format:'%ae'",
+          "git config --global user.name \"`git log -1 --pretty=format:'%an'`\"",
+          "git config --global user.email \"`git log -1 --pretty=format:'%ae'`\"",
         ],
       },
     ],
