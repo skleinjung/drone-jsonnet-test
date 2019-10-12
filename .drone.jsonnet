@@ -33,6 +33,7 @@ local _pipelineFactory = {
 //  },
 
   createStep(stepName):: {
+    [std.trace('err:' + stepName, null)]:: null,
     name: stepName,
   },
 
