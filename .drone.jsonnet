@@ -29,7 +29,8 @@ local createPipelines(steps) = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       }),
-      steps.yarn('build', ['install', 'bootstrap', 'build']),
+      steps.yarn('install'),
+      steps.yarn('build'),
     ]
   },
 ];
@@ -114,7 +115,7 @@ local __pipelineFactory = {
     },
 
     yarn: {
-      getStepConfig(name, scripts, config = {}): {
+      getStepConfig(name, scripts = [name], config = {}): {
         name: name,
         config: config,
         builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }),
