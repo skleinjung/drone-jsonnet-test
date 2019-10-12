@@ -34,8 +34,8 @@ local _pipelineFactory = {
 
   createStep(stepName):: {
     name: stepName,
+    image: 'node',
   },
-
 
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
@@ -56,8 +56,9 @@ local _pipelineFactory = {
 //      ], // std.objectFields(o)
       [
         {
-          name: 'foo'
-        }
+          name: 'foo',
+          image: 'node',
+        },
       ],
       if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep, std.objectFields(config.steps)) else [],
 //      [
