@@ -38,7 +38,6 @@ local _pipelineFactory = {
 
   createStep(pipelineConfig):: function (stepName)
     { name: stepName } +
-    if (std.objectHas(pipelineConfig.steps[stepName], '__config')) then pipelineConfig.steps[stepName].__config else {} +
     if (std.objectHas(pipelineConfig.steps[stepName], '__builder'))
       then pipelineConfig.steps[stepName].__builder(pipelineConfig, pipelineConfig.steps[stepName])
       else pipelineConfig.steps[stepName],
