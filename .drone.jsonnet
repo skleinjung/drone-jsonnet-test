@@ -6,14 +6,14 @@ local environment = {
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local Pipeline() = {
+local Pipeline(options) = {
   kind: 'pipeline',
   name: 'default',
   steps: [
     {
       name: 'say-hi',
       image: 'node:10',
-      environment: if environment then environment else {},
+//      environment: {} + environment,
       commands: [
         'echo ">>> Hello, $${GREETEE_NAME}!"'
       ],
