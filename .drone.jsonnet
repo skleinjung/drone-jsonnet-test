@@ -3,9 +3,9 @@ local createPipelines(steps) = [
     environment: {
       GREETEE_NAME: 'default name',
     },
-    npmPublishConfig: {
-      tokenSecretName: 'NPM_PUBLISH_TOKEN',
-    },
+//    npmPublishConfig: {
+//      tokenSecretName: 'NPM_PUBLISH_TOKEN',
+//    },
     steps: [
       steps.custom('generic', {
         image: 'node',
