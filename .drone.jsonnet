@@ -1,6 +1,6 @@
-local environment = {
-  GREETEE_NAME: 'person',
-};
+//local environment = {
+//  GREETEE_NAME: 'person',
+//};
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
@@ -20,11 +20,9 @@ local helpers = {
         ],
       },
     ],
-  },
+  }
 };
 
-function() {
-  [
-    helpers.CreatePipeline()
-  ]
-}
+function() [
+   helpers.CreatePipeline(),
+]
