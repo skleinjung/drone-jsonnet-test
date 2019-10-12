@@ -17,7 +17,7 @@ local Pipeline() = {
         GREETEE_NAME: 'Drone'
        },
       commands: [
-        'echo ">>> Hello, ${GREETEE_NAME}!"'
+        'echo ">>> Hello, $${GREETEE_NAME}!"'
       ],
     },
   ],
