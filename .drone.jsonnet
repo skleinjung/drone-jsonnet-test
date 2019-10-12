@@ -8,7 +8,7 @@ local configuration = {
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-function() [
+function(configuration = configuration) [
   local _helpers = {
     WithDefaults(configuration = {}): {
       environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
