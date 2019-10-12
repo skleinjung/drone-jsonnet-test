@@ -42,7 +42,7 @@ local _pipelineFactory = {
     + {
       name: stepName,
     }
-    + if stepConfig.type == 'yarn' then {
+    + if stepConfigs[stepName].type == 'yarn' then {
       image: 'node',
       commands: stepConfigs[stepName].commands
     } else {},
