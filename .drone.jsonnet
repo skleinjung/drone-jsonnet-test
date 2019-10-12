@@ -16,14 +16,14 @@ local pipelines = [
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local PipelineFactory = {
+local _pipelineFactory = {
   _withDefaults(configuration = {}): {
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
   },
 
   createPipeline(configuration = {}): {
-    local config = PipelineFactory.node .WithDefaults(configuration),
+    local config = _pipelineFactory.WithDefaults(configuration),
 
     kind: 'pipeline',
     name: config.name,
@@ -40,4 +40,4 @@ local PipelineFactory = {
   },
 };
 
-std.map(PipelineFactory.createPipeline, pipelines)
+std.map(_pipelineFactory.createPipeline, pipelines)
