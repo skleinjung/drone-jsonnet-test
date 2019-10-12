@@ -52,7 +52,7 @@ local __pipelineFactory = {
       {
         name: 'init-git',
         image: 'bitnami/git:latest',
-        command: 'echo HELLO WORLD',
+        command: ['--version'],
       },
     ],
     if std.objectHas(pipelineConfig, 'npmPublishConfig') then [
