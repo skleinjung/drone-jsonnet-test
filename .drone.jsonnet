@@ -28,7 +28,7 @@ local _pipelineFactory = {
     nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
   },
 
-  createStep(stepsConfig):: function(stepName) stepsConfig[stepName] + {
+  createStep(stepsConfig):: function(stepName) {
     name: stepName,
   },
 
