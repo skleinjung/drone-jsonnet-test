@@ -49,8 +49,7 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-//      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps)) else [],
-      std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps))
+      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps)) else [],
 //      [
 //        {
 //          name: 'say-hi',
