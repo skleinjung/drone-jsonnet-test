@@ -48,7 +48,7 @@ local _pipelineFactory = {
     } else {},
 
   stepConfigBuilder: {
-    yarn(commands, config): {
+    yarn(commands, config = {}): {
       type: 'yarn',
       config: config,
       commands: commands,
