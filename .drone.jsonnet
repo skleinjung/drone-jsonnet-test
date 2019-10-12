@@ -22,7 +22,7 @@ local pipelines = [
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
 local _pipelineFactory = {
-  withDefaults(configuration = {}):: +configuration {
+  withDefaults(configuration = {}):: configuration + {
     environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
