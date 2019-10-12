@@ -48,8 +48,8 @@ local _pipelineFactory = {
     + {
       name: stepName,
     }
-    + if (std.objectHas(stepConfigs[stepName], 'type') )
-        then createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
+    + if (std.objectHas(stepConfigs[stepName], 'type'))
+        then _pipelineFactory.createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
         else null,
 
   stepConfigBuilder: {
