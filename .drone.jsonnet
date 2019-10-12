@@ -1,36 +1,37 @@
-local configuration = {
-  environment: {
-    GREETEE_NAME: 'Mensch',
-  },
-};
+local pipelines = [
+  node.createPipeline({
+    environment: {
+      GREETEE_NAME: 'guyo',
+    },
+  }),
+];
 
 // !!! BEGAN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-function(configuration = configuration) [
-  local _helpers = {
-    WithDefaults(configuration = {}): {
-      environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
-    },
+local node = {
+  _withDefaults(configuration = {}): {
+    name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
+    environment: if std.objectHas(configuration, 'environment') then configuration.environment else {},
+  },
 
-    CreatePipeline(passedConfiguration = {}): {
-      local config = _helpers.WithDefaults(passedConfiguration),
+  createPipeline(configuration = {}): {
+    local config = _helpers.WithDefaults(configuration),
 
-      kind: 'pipeline',
-      name: 'default',
-      steps: [
-        {
-          name: 'say-hi',
-          image: 'node:10',
-          environment: config.environment,
-          commands: [
-            'echo ">>> Hello, $${GREETEE_NAME}!"'
-          ],
-        },
-      ],
-    }
-  };
+    kind: 'pipeline',
+    name: config.name,
+    steps: [
+      {
+        name: 'say-hi',
+        image: 'node:10',
+        environment: config.environment,
+        commands: [
+          'echo ">>> Hello, $${GREETEE_NAME}!"'
+        ],
+      },
+    ],
+  },
+};
 
-  _helpers.CreatePipeline(),
-]
+pipelines
