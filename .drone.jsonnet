@@ -1,4 +1,4 @@
-local pipelines(steps) = [
+local pipelines(stepBuilder) = [
   {
     environment: {
       GREETEE_NAME: 'default name',
@@ -19,7 +19,7 @@ local pipelines(steps) = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       },
-      build: steps.yarn(['install', 'bootstrap', 'build'])
+      build: stepBuilder.yarn(['install', 'bootstrap', 'build'])
     }
   },
 ];
@@ -36,35 +36,16 @@ local _pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
-  isConfigurationValid(configuration):: true,
-
-  createTypeSpecificStepConfiguration(stepConfig, type)::
-    if type == 'yarn' then {
-      image: 'node',
-      commands: stepConfig.commands
-    } else {},
-
-  createStep(stepConfigs):: function (stepName) stepConfigs[stepName]
+  createStep(pipelineConfig):: function (stepName) pipelineConfig.steps[stepName]
     + {
       name: stepName,
     }
-    + if (std.objectHas(stepConfigs[stepName], 'type'))
-      then _pipelineFactory.createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
+    + if (std.objectHas(pipelineConfig.steps[stepName], '__builder'))
+      then pipelineConfig.steps[stepName].__builder(pipelineConfig, pipelineConfig.steps[stepName])
       else {},
-
-  createYarnCommand(script):: 'echo ">>> yarn ' + script + '"',
-
-  stepConfigBuilder: {
-    yarn(commands, config = {}): {
-      type: 'yarn',
-      config: config,
-      commands: std.map(_pipelineFactory.createYarnCommand, commands),
-    },
-  },
 
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
-    local validConfiguration = std.assertEqual(_pipelineFactory.isConfigurationValid(config), true),
 
     kind: 'pipeline',
     name: config.name,
@@ -80,7 +61,7 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps)) else [],
+      std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps))
 //      [
 //        {
 //          name: 'say-hi',
@@ -93,6 +74,25 @@ local _pipelineFactory = {
 //      ],
     ]),
   },
+
+  configBuilders:: {
+    yarn:: {
+      buildConfig(commands, config = {}): {
+        __type: 'yarn',
+        __builder: _pipelineFactory.configBuilders.yarn.buildStep,
+        _commands: std.map(_pipelineFactory.createYarnCommand, commands),
+      },
+
+      buildStep(pipelineConfig, stepConfig): {
+        image: pipelineConfig.nodeImage,
+        commands: std.map(_pipelineFactory.configBuilders.yarn.createCommand, stepConfig._commands),
+      },
+
+      createCommand(script):: 'echo ">>> yarn ' + script + '"',
+    },
+  },
 };
 
-std.map(_pipelineFactory.createPipeline, pipelines(_pipelineFactory.stepConfigBuilder))
+std.map(_pipelineFactory.createPipeline, pipelines({
+  yarn: _pipelineFactory.configBuilders.yarn.buildConfig,
+}))
