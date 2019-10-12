@@ -13,7 +13,9 @@ local Pipeline() = {
     {
       name: 'say-hi',
       image: 'node:10',
-      environment: [{GIT_AUTHOR_NAME: 'Drone'}],
+      environment: {
+        GREETEE_NAME: 'Drone'
+       },
       commands: [
         'echo ">>> Hello, ${GREETEE_NAME}!"'
       ],
