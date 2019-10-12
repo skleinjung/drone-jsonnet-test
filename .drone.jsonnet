@@ -75,15 +75,16 @@ local _pipelineFactory = {
 
   configBuilders:: {
     yarn:: {
-      buildConfig(commands, config = {}): {
+      buildConfig(scripts, config = {}): {
         __type: 'yarn',
         __builder: _pipelineFactory.configBuilders.yarn.buildStep,
-        _commands: std.map(_pipelineFactory.createYarnCommand, commands),
+        __config: config,
+        __scripts: scripts,
       },
 
       buildStep(pipelineConfig, stepConfig): {
         image: pipelineConfig.nodeImage,
-        commands: std.map(_pipelineFactory.configBuilders.yarn.createCommand, stepConfig._commands),
+        commands: stpeConfig.__config + std.map(_pipelineFactory.configBuilders.yarn.createCommand, stepConfig.__scripts),
       },
 
       createCommand(script):: 'echo ">>> yarn ' + script + '"',
