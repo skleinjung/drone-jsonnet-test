@@ -38,17 +38,17 @@ local _pipelineFactory = {
     kind: 'pipeline',
     name: config.name,
     steps: std.flattenArrays([
-      [
-        {
-          name: 'npm-auth',
-          image: 'robertstettner/drone-npm-auth',
-          settings: {
-            token: {
-              from_secret: 'NPM_PUBLISH_TOKEN',
-            }
-          },
-        },
-      ], // std.objectFields(o)
+//      [
+//        {
+//          name: 'npm-auth',
+//          image: 'robertstettner/drone-npm-auth',
+//          settings: {
+//            token: {
+//              from_secret: 'NPM_PUBLISH_TOKEN',
+//            }
+//          },
+//        },
+//      ], // std.objectFields(o)
       if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps)) else [],
       [
         {
