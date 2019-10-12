@@ -50,7 +50,7 @@ local __pipelineFactory = {
         else {},
 
   getInitSteps(pipelineConfig)::
-    if std.objectHas(pipelineConfig, npmPublishConfig) then
+    if std.objectHas(pipelineConfig, 'npmPublishConfig') then
     [{
       name: 'npm-auth',
       image: 'robertstettner/drone-npm-auth',
