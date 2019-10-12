@@ -29,7 +29,7 @@ local createPipelines(steps) = [
           'echo ">>> Hello, $${GREETEE_NAME}!"'
         ],
       }),
-      steps.yarn('build', ['install $${GREETEE_NAME}', 'bootstrap', 'build']),
+      steps.yarn('build', ['install', 'bootstrap', 'build']),
     ]
   },
 ];
