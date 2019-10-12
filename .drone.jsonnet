@@ -28,9 +28,14 @@ local _pipelineFactory = {
     nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
   },
 
-  createStep(stepsConfig):: function(stepName) stepsConfig[stepName] + {
+//  createStep(stepsConfig):: function(stepName) stepsConfig[stepName] + {
+//    name: stepName,
+//  },
+
+  createStep(stepName):: {
     name: stepName,
   },
+
 
   createPipeline(configuration = {}): {
     local config = _pipelineFactory.withDefaults(configuration),
@@ -49,7 +54,7 @@ local _pipelineFactory = {
 //          },
 //        },
 //      ], // std.objectFields(o)
-      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep(config.steps), std.objectFields(config.steps)) else [],
+      if std.objectHas(config, 'steps') then std.map(_pipelineFactory.createStep, std.objectFields(config.steps)) else [],
 //      [
 //        {
 //          name: 'say-hi',
