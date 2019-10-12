@@ -1,12 +1,15 @@
+local environment = import '.drone/environment.libsonnet';
+
 local Pipeline() = {
-  kind: pipeline,
-  name: default,
+  kind: 'pipeline',
+  name: 'default',
   steps: [
     {
       name: 'say-hi',
       image: 'node:10',
+      environment: environment,
       commands: [
-        'echo ">>> Hello, world!"'
+        'echo ">>> Hello, ${GREETEE_NAME}!"'
       ],
     },
   ],

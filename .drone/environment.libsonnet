@@ -1,0 +1,3 @@
+{
+  GREETEE_NAME: 'Sean'
+}
