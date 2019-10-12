@@ -42,7 +42,7 @@ local _pipelineFactory = {
     if type == 'yarn' then {
       image: 'node',
       commands: stepConfig.commands
-    } else null,
+    } else {},
 
   createStep(stepConfigs):: function (stepName) stepConfigs[stepName]
     + {
@@ -50,7 +50,7 @@ local _pipelineFactory = {
     }
     + if (std.objectHas(stepConfigs[stepName], 'type'))
         then _pipelineFactory.createTypeSpecificStepConfiguration(stepConfigs[stepName], stepConfigs[stepName].type)
-        else null,
+        else {},
 
   stepConfigBuilder: {
     yarn(commands, config = {}): {
