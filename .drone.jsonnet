@@ -22,5 +22,7 @@ local Pipeline(options = {}) = {
 };
 
 [
-  Pipeline(),
+  Pipeline({
+    environment: environment,
+  }),
 ]
