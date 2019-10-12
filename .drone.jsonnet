@@ -33,6 +33,6 @@ function () {
   }
 
   [
-     _helpers.CreatePipeline(configuration)
+     _helpers.CreatePipeline($.configuration)
   ]
 }
