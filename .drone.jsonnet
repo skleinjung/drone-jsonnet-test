@@ -377,7 +377,7 @@ local __pipelineFactory() = {
       if std.objectHas(stepBuilder, 'validate')
         then __t.castArray(stepBuilder.validate(pipelineConfig))
         else [];
-    __t.removeNulls(
+    __t.withoutNulls(
       std.flattenArrays(
         std.map(self.validateStep(pipelineConfig), stepBuilders))),
 
