@@ -32,7 +32,6 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-
       steps.publish({
         // optional, defaults to 'publish'
         baseStepName: 'publish',
@@ -49,15 +48,16 @@ local createPipelines(steps) = [
         tokenSecret: 'NPM_PUBLISH_TOKEN',
 
         // each entry is a prerelease tag/branch names combo
-        alpha: ['develop'],
-        preview: {
-          exclude: ['master', 'develop']
-        }
+        prereleases: {
+          alpha: ['develop'],
+          preview: {
+            exclude: ['master', 'develop']
+          }
+        },
       }),
     ]
   },
 ];
-
 
 // !!! BEGIN AUTO-GENERATED CONFIGURATION !!!
 // !!! The following content is not meant to be edited by hand
@@ -95,7 +95,6 @@ local __custom(name, config = {}) = {
   ],
 };
 
-
 local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
 local __yarn(name, scripts = [name], config = {}) = {
   builder: function (pipelineConfig) [
@@ -112,11 +111,23 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, branches, e
   image: image,
   environment: environment,
   commands: [
-    ': *** publishing - ' + stepName,
+    ': *** publishing release',
     std.join(' ', ['echo', 'yarn', scriptName]),
   ],
   when: {
     branch: branches
+  }
+};
+local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, environment = {}) = function(prereleaseName) {
+  name: std.join('-', [baseStepName, 'prerelease', prereleaseName]),
+  image: image,
+  environment: environment + { PRERELEASE_ID: preleaseName },
+  commands: [
+    ': *** publishing pre-release: ' + prereleaseName,
+    std.join(' ', ['echo', 'yarn', scriptName]),
+  ],
+  when: {
+    branch: prereleaseConfig[prereleaseName]
   }
 };
 local __publish(publishConfig = {}) = {
@@ -156,7 +167,14 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch])
+      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch]),
+      if std.objectHas(pipelineConfig, 'prereleases')
+        then std.map(__createPrereleaseStep(
+          pipelineConfig.prereleases,
+          pipelineConfig.nodeImage,
+          baseStepName,
+          releaseScriptName), pipelineConfig.prereleases)
+        else []
     ]
 };
 
