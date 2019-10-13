@@ -103,7 +103,7 @@ local __pipelineFactory = {
   createSteps(pipelineConfig):: function (step)
     { environment: pipelineConfig.environment }
     + if (std.objectHas(step, 'builder'))
-        then (if std.objectHas(step, 'config') then step.config else {}) + step.builder(pipelineConfig)
+        then step.builder(pipelineConfig)
         else [],
 
   createPipeline(configuration = {}): {
@@ -121,12 +121,12 @@ local __pipelineFactory = {
       getStepConfig(name, config = {}): {
         name: name,
         config: config,
-        builder: __pipelineFactory.configBuilders.custom.buildStep(name),
+        builder: __pipelineFactory.configBuilders.custom.buildStep(name, config),
       },
 
       // use provided configuration, without augmenting it
-      buildStep(name): function (pipelineConfig) [
-        {
+      buildStep(name): function (pipelineConfig, config) [
+        config + {
           name: name,
         }
       ],
@@ -134,12 +134,11 @@ local __pipelineFactory = {
 
     publish: {
       getStepConfig(name, scripts = [name], config = {}): {
-        config: config,
-        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }),
+        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }, config),
       },
 
-      buildStep(name, stepConfig): function (pipelineConfig) [
-        {
+      buildStep(name, stepConfig, defaults): function (pipelineConfig) [
+        defaults + {
           name: name,
           image: pipelineConfig.nodeImage,
           commands:
@@ -151,12 +150,11 @@ local __pipelineFactory = {
 
     yarn: {
       getStepConfig(name, scripts = [name], config = {}): {
-        config: config,
-        builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }),
+        builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }, config),
       },
 
-      buildStep(name, stepConfig): function (pipelineConfig) [
-       {
+      buildStep(name, stepConfig): function (pipelineConfig, defaults) [
+        default + {
           name: name,
           image: pipelineConfig.nodeImage,
           commands:
