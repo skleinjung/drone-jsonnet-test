@@ -126,9 +126,6 @@ local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, 
     ': *** publishing pre-release: ' + prereleaseName,
     std.join(' ', ['echo', 'yarn', scriptName]),
   ],
-  when: {
-    branch: prereleaseConfig[prereleaseName]
-  }
 };
 local __publish(publishConfig = {}) = {
   local baseStepName =
