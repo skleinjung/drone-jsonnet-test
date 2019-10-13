@@ -147,7 +147,7 @@ local __yarn(name, scripts = [name], config = {}) = {
 local __createPublishStep(image, baseStepName, publishConfig, environment = {}) = function(publish) {
   local releaseName = if std.objectHas(publish, 'prerelease') then publish.prerelease else 'production',
   local scriptName = if std.objectHas(publish, 'prerelease')
-    then publishConfig.prereleaseScriptName + ' -- $$PRERELEASE_ID --',
+    then publishConfig.prereleaseScriptName + ' -- $$PRERELEASE_ID --'
     else publishConfig.releaseScriptName,
   local isCanary = std.objectHas(publish, 'canary') && publish.canary,
 
