@@ -383,7 +383,7 @@ local __pipelineFactory() = {
       commands: [
         ': >>> There were error(s) in the build pipeline configuration:',
         ': '
-      ] + errors
+      ]// + errors
     }).build(pipelineConfig),
 
   createPipeline(configuration = {}): {
