@@ -149,13 +149,14 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
   local scriptName = if std.objectHas(publish, 'prerelease')
     then publishConfig.prereleaseScriptName
     else publishConfig.releaseScriptName,
+  local isCanary = std.objectHas(publish, 'canary') && publish.canary,
 
   name: std.join('-', [baseStepName, 'publish', releaseName]),
   image: image,
   environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
     ': *** publishing: ' + releaseName,
-    std.join(' ', ['echo', 'yarn', scriptName, if publish['canary'] == true then '--canary']),
+    std.join(' ', ['echo', 'yarn', scriptName, if isCanary then '--canary']),
   ],
   when: {
     branch: publish.branches,
