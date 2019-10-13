@@ -377,15 +377,14 @@ local __pipelineFactory() = {
    * with the validation messages. Should generate a pipeline that terminates
    * without building, but informs the user what was wrong.
    */
-  createErrorPipeline(pipelineConfig, errors):: [
-//    __customStepBuilder('log-configuration-errors', {
-//      image: 'alpine',
-//      commands: [
-//        ': >>> There were error(s) in the build pipeline configuration:',
-//        ': '
-//      ] + errors
-//    }).build(pipelineConfig)
-  ],
+  createErrorPipeline(pipelineConfig, errors)::
+    __customStepBuilder('log-configuration-errors', {
+      image: 'alpine',
+      commands: [
+        ': >>> There were error(s) in the build pipeline configuration:',
+        ': '
+      ] + errors
+    }).build(pipelineConfig),
 
   createPipeline(configuration = {}): {
     local config = pipelineFactory.withDefaults(configuration),
