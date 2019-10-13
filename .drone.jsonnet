@@ -261,11 +261,10 @@ local __defaultPipelineConfiguration = {
  * on valid configuration options.
  */
 local __customStepBuilder(name = null, config = {}) = {
-  validate: function (pipelineConfig) [] +
-    if name == null then
-      ['Custom step definition is missing a "name".'] else [] +
-    if !std.objectHas(config, 'image') then
-      ['Custom step "' + name + '" is missing a container image.'] else [] ,
+  validate: function (pipelineConfig) [
+    if name == null then 'Custom step definition is missing a "name".',
+    if !std.objectHas(config, 'image') then 'Custom step "' + name + '" is missing a container image.'
+  ],
 
   build: function (pipelineConfig) [
     config + {
