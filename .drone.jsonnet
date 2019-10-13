@@ -15,7 +15,7 @@ local createPipelines(steps) = [
     steps: [
       steps.custom(null, {
         image: 'node',
-        commands: ['echo ">>> Hello, $${GREETEE_NAME}!"'],
+        commands: ['echo "*** Hello, $${GREETEE_NAME}!"'],
       }),
       steps.custom('generic-with-custom-environment', {
         image: 'node',
@@ -23,7 +23,7 @@ local createPipelines(steps) = [
           GREETEE_NAME: 'generic override',
         },
         commands: [
-          'echo ">>> Hello, $${GREETEE_NAME}!"'
+          'echo "*** Hello, $${GREETEE_NAME}!"'
         ],
       }),
       steps.yarn('install'),
@@ -381,9 +381,9 @@ local __pipelineFactory() = {
     __customStepBuilder('log-configuration-errors', {
       image: 'alpine',
       commands: [
-        ': >>> There were error(s) in the build pipeline configuration:',
+        ': *** There were error(s) in the build pipeline configuration:',
         ': '
-      ]// + errors
+      ] + std.map((function(message) ': ' + message), errors)
     }).build(pipelineConfig),
 
   createPipeline(configuration = {}): {
