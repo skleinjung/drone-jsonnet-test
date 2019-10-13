@@ -356,7 +356,7 @@ local __pipelineFactory() = {
       else [],
 
   getInitSteps(pipelineConfig)::
-    __pipelineFactory.getStartNotificationSteps(pipelineConfig) +
+    pipelineFactory.getStartNotificationSteps(pipelineConfig) +
     [
       __initGitHubStep(pipelineConfig)
     ],
