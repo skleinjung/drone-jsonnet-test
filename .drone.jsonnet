@@ -120,12 +120,11 @@ local __pipelineFactory = {
     custom: {
       getStepConfig(name, config = {}): {
         name: name,
-        config: config,
         builder: __pipelineFactory.configBuilders.custom.buildStep(name, config),
       },
 
       // use provided configuration, without augmenting it
-      buildStep(name): function (pipelineConfig, config) [
+      buildStep(name, config): function (pipelineConfig, config) [
         config + {
           name: name,
         }
