@@ -406,7 +406,7 @@ local __pipelineFactory() = {
   createPipeline(defaultInitStepBuilders): function (configuration = {}) {
     local config = pipelineFactory.withDefaults(configuration),
     local errors = __t.assertAll({
-      ["Pipeline '" + config.name + "' did not have any steps."]: __t.hasNonEmptyArray(config, 'steps'),
+      ["Pipeline [" + config.name + "] did not have any steps."]: __t.hasNonEmptyArray(config, 'steps'),
     }),
 
     local builderResult = if errors != null
