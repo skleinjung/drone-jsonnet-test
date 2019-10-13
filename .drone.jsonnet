@@ -145,19 +145,7 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __createReleaseStep(image, baseStepName, stepName, scriptName, branch, environment = {}) = {
-  name: std.join('-', [baseStepName, stepName]),
-  image: image,
-  environment: environment,
-  commands: [
-    ': *** publishing release',
-    std.join(' ', ['yarn', scriptName]),
-  ],
-  when: {
-    branch: [branch]
-  }
-};
-local __createPublishStep(image, publishConfig, environment = {}) = function(publish) {
+local __createPublishStep(image, baseStepName, publishConfig, environment = {}) = function(publish) {
   local releaseName = if std.objectHas(publish, 'prerelease') then publish.prerelease else 'production',
   local scriptName = if std.objectHas(publish, 'prerelease')
     then publishConfig.prereleaseScriptName
@@ -215,6 +203,7 @@ local __publish(publishConfig = {}) = {
     if std.objectHas(publishConfig, 'configurations')
       then std.map(__createPublishStep(
         pipelineConfig.nodeImage,
+        baseStepName,
         publishConfig), publishConfig.configurations)
       else []
 };
