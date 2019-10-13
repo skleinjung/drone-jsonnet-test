@@ -102,30 +102,6 @@ local createPipelines(steps) = [
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local __initGitHubStep(pipelineConfig) = {
-   local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
-   local defaultName = "`git log -1 --pretty=format:'%an'`",
-   local authorEmail =
-     if std.objectHas(pipelineConfig, 'git') then
-       if std.objectHas(pipelineConfig.git, 'authorEmail') then pipelineConfig.git.authorEmail else defaultEmail
-     else
-       defaultEmail,
-
-  local authorName =
-     if std.objectHas(pipelineConfig, 'git') then
-       if std.objectHas(pipelineConfig.git, 'authorName') then pipelineConfig.git.authorName else defaultName
-     else
-       defaultName,
-
-   name: 'init-git',
-   image: 'alpine/git',
-   commands: [
-     ': *** Initializing git user information...',
-     'git config --local user.email "' + authorEmail + '"',
-     'git config --local user.name "' + authorName + '"',
-   ],
- };
-
 local __createPublishStep(image, baseStepName, publishConfig, environment = {}) = function(publish) {
   local prereleaseScriptName =
     if std.objectHas(publishConfig, 'prereleaseScriptName')
@@ -245,7 +221,8 @@ local __defaultPipelineConfiguration = {
  *
  * A builder is a function that takes arbitrary parameters, and returns an
  * object that must have 'build' function. The build function must take a
- * 'PipelineConfiguration' object, and return an array of Step objects.
+ * 'PipelineConfiguration' object, and return a single Step object, or an array
+ * of Step objects.
  *
  * Step objects should match the Step configuration requirements for the version
  * of Drone in use. See https://docker-runner.docs.drone.io/configuration/steps/
@@ -301,6 +278,32 @@ local __releaseStepBuilder(releaseConfig = {}) = {
 
   build: function (pipelineConfig)
     self.buildVersionSteps(pipelineConfig)
+};
+
+local __initGitStepBuilder() = {
+  local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
+  local defaultName = "`git log -1 --pretty=format:'%an'`",
+  local authorEmail =
+    if std.objectHas(pipelineConfig, 'git') then
+      if std.objectHas(pipelineConfig.git, 'authorEmail') then pipelineConfig.git.authorEmail else defaultEmail
+    else
+      defaultEmail,
+
+  local authorName =
+    if std.objectHas(pipelineConfig, 'git') then
+      if std.objectHas(pipelineConfig.git, 'authorName') then pipelineConfig.git.authorName else defaultName
+    else
+      defaultName,
+
+  build: function (pipelineConfig) {
+    name: 'init-git',
+    image: 'alpine/git',
+    commands: [
+      ': *** Initializing git user information...',
+      'git config --local user.email "' + authorEmail + '"',
+      'git config --local user.name "' + authorName + '"',
+    ]
+  },
 };
 
 local __pipelineFactory() = {
@@ -383,7 +386,7 @@ local __pipelineFactory() = {
    * with the validation messages. Should generate a pipeline that terminates
    * without building, but informs the user what was wrong.
    */
-  createErrorPipeline(pipelineConfig, errors)::
+  createErrorSteps(pipelineConfig, errors)::
     __customStepBuilder('log-configuration-errors', {
       image: 'alpine',
       commands: [
@@ -402,8 +405,7 @@ local __pipelineFactory() = {
 
     steps:
       if std.length(validationErrors) > 0 then
-        pipelineFactory.createErrorPipeline(config, validationErrors)
-//        pipelineFactory.getInitSteps(config)
+        pipelineFactory.createErrorSteps(config, validationErrors)
       else
         pipelineFactory.getInitSteps(config) +
         std.flattenArrays(std.map(pipelineFactory.createSteps(config), config.steps)) +
@@ -413,7 +415,17 @@ local __pipelineFactory() = {
   },
 };
 
-std.map(__pipelineFactory().createPipeline, createPipelines({
+local initStepBuilders = [
+  __initGitStepBuilder()
+];
+
+local stepBuilderFactory = {
   custom: __customStepBuilder,
   yarn: __yarnStepBuilder,
-}))
+};
+
+std.map(__pipelineFactory().createPipeline,
+  initStepBuilders +
+  createPipelines(stepBuilderFactory)
+)
+
