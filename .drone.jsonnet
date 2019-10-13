@@ -37,8 +37,8 @@ local createPipelines(steps) = [
         // optional, defaults to 'publish'
         baseStepName: 'publish',
 
-        // optional, defaults to ['master']
-        branch: ['master'],
+        // optional, defaults to 'master'
+        branch: 'master',
 
         // optional, defaults to 'release:pre'
         prereleaseScriptName: 'release:pre',
@@ -142,7 +142,7 @@ local __publish(publishConfig = {}) = {
   local releaseBranch =
     if std.objectHas(publishConfig, 'branch')
     then publishConfig.branch
-    else ['master'],
+    else 'master',
 
   builder: function (pipelineConfig)
     [
@@ -155,7 +155,7 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName)
+      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch])
     ]
 };
 
