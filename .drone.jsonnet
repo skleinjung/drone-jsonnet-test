@@ -48,7 +48,6 @@ local createPipelines(steps) = [
         configurations: [
           {
             branches: ['master'],
-            prerelease: 'alpha',
           },
           {
             branches: ['develop'],
@@ -152,7 +151,7 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
     else publishConfig.releaseScriptName,
   local isCanary = std.objectHas(publish, 'canary') && publish.canary,
 
-  name: std.join('-', [baseStepName, 'publish', releaseName]),
+  name: std.join('-', [baseStepName, releaseName]),
   image: image,
   environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
