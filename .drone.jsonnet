@@ -149,10 +149,10 @@ local __pipelineFactory = {
 
     yarn: {
       getStepConfig(name, scripts = [name], config = {}): {
-        builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }, config),
+        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }, config),
       },
 
-      buildStep(name, stepConfig): function (pipelineConfig) [
+      buildStep(name, stepConfig, defaults): function (pipelineConfig) [
         defaults + {
           name: name,
           image: pipelineConfig.nodeImage,
