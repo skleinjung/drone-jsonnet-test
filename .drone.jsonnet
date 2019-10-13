@@ -174,7 +174,7 @@ local __publish(publishConfig = {}) = {
         pipelineConfig.prereleases,
         pipelineConfig.nodeImage,
         baseStepName,
-        releaseScriptName), pipelineConfig.prereleases)
+        releaseScriptName), std.objectFields(pipelineConfig.prereleases))
       else []
 };
 
