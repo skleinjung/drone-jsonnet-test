@@ -209,7 +209,7 @@ local __customStepBuilder(name, config = {}) = {
 };
 
 local __yarnStepBuilder(name, scripts = [name], config = {}) = {
-  createCommand(script): std.join(' ', ['echo', 'yarn', script]),
+  createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
 
   build: function (pipelineConfig) [
     config + {
