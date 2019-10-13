@@ -389,7 +389,7 @@ local __pipelineFactory() = {
         ': *** There were errors in the build pipeline configuration:',
         ': '
       ] + std.map((function(message) ': ' + std.escapeStringBash(message)), errors)
-      + 'exit 1'
+      + 'exit -1'
     }).build(pipelineConfig),
 
   createPipeline(configuration = {}): {
