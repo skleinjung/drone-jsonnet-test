@@ -197,7 +197,7 @@ local __publish(publishConfig = {}) = {
  * Thrashplay helper library
  */
 local __t = {
-  castArray(value): if (std.type(value) == 'aray') then value else [value],
+  castArray(value): if (std.type(value) == 'array') then value else [value],
   execIf(predicate, action, default): if predicate then action() else default,
   removeNulls(array): std.filter((function(value) value != null), array),
 };
