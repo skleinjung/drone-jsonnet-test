@@ -215,9 +215,10 @@ local __yarnStepBuilder(name, scripts = [name], config = {}) = {
     config + {
       name: name,
       image: pipelineConfig.nodeImage,
-      commands:
+      commands(createCommand): (
         [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] +
-        std.map(self.createCommand, scripts),
+        std.map(createCommand, scripts)
+      )(self.createCommand),
     }
   ],
 };
