@@ -373,18 +373,12 @@ local __pipelineFactory() = {
       if (std.objectHas(step, 'build')) then step.build(pipelineConfig) else []),
 
   /**
-   * Called when one or more steps have invalid cconfiguration, and is supplied
+   * Called when one or more steps have invalid configuration, and is supplied
    * with the validation messages. Should generate a pipeline that terminates
    * without building, but informs the user what was wrong.
    */
   createErrorPipeline(pipelineConfig, errors):: [
-    __customStepBuilder('log-configuration-errors', {
-      image: 'alpine',
-      commands: [
-        ': >>> There were error(s) in the build pipeline configuration:',
-        ': '
-      ] + errors
-    }).build(pipelineConfig)
+    __customStepBuilder('log-configuration-errors', {}).build(pipelineConfig)
   ],
 
   createPipeline(configuration = {}): {
