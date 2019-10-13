@@ -429,7 +429,7 @@ local __pipelineFactory() = {
     local config = pipelineFactory.withDefaults(configuration),
     local builderResult = pipelineFactory.createStepsFromBuilders(
       config,
-      defaultInitStepsBuilders + config.steps),
+      defaultInitStepBuilders + config.steps),
 
     kind: 'pipeline',
     name: config.name,
