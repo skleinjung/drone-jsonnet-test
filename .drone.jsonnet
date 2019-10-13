@@ -72,6 +72,20 @@ local __initGitHubStep(pipelineConfig) = {
    ],
  };
 
+local __custom = {
+  getStepConfig(name, config = {}): {
+    name: name,
+    builder: __custom.buildStep(name, config),
+  },
+
+  // use provided configuration, without augmenting it
+  buildStep(name, config): function (pipelineConfig) [
+    config + {
+      name: name,
+    }
+  ],
+};
+
 local __pipelineFactory = {
   /**
    * Apply default configurations to a pipeline config.
@@ -118,19 +132,7 @@ local __pipelineFactory = {
   },
 
   configBuilders:: {
-    custom: {
-      getStepConfig(name, config = {}): {
-        name: name,
-        builder: __pipelineFactory.configBuilders.custom.buildStep(name, config),
-      },
 
-      // use provided configuration, without augmenting it
-      buildStep(name, config): function (pipelineConfig) [
-        config + {
-          name: name,
-        }
-      ],
-    },
 
     publish: {
       getStepConfig(name, scripts = [name], config = {}): {
@@ -169,7 +171,7 @@ local __pipelineFactory = {
 };
 
 std.map(__pipelineFactory.createPipeline, createPipelines({
-  custom: __pipelineFactory.configBuilders.custom.getStepConfig,
+  custom: __custom,
   publish: __pipelineFactory.configBuilders.custom.publish,
   yarn: __pipelineFactory.configBuilders.yarn.getStepConfig,
 }))
