@@ -122,12 +122,12 @@ local __publish(publishConfig = {}) = {
   local prereleaseScriptName =
     if std.objectHas(publishConfig, 'prereleaseScriptName')
     then publishConfig.prereleaseScriptName
-    else ['release:pre'],
+    else 'release:pre',
 
   local releaseScriptName =
     if std.objectHas(publishConfig, 'releaseScriptName')
     then publishConfig.releaseScriptName
-    else ['release:graduate'],
+    else 'release:graduate',
 
   local releaseBranch =
     if std.objectHas(publishConfig, 'branch')
