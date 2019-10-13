@@ -37,7 +37,7 @@ local createPipelines(steps) = [
         baseStepName: 'publish',
 
         // optional, defaults to 'master'
-        branch: 'master',
+        branch: 'super-cool-release',
 
         // optional, defaults to 'release:pre'
         prereleaseScriptName: 'release:pre',
