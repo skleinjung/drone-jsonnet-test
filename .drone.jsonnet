@@ -100,9 +100,11 @@ local __pipelineFactory = {
       }
     ] else [],
 
-  createSteps(pipelineConfig):: function (step)  + if (std.objectHas(step, 'builder'))
-    then (if (std.objectHas(step, 'config')) then step.config else {}) + step.builder(name, pipelineConfig)
-    else [],
+  createSteps(pipelineConfig):: function (step)
+    { environment: pipelineConfig.environment }
+    + if (std.objectHas(step, 'builder'))
+        then (if std.objectHas(step, 'config') then step.config else {}) + step.builder(name, pipelineConfig)
+        else [],
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
@@ -126,7 +128,6 @@ local __pipelineFactory = {
       buildStep(pipelineConfig): [
         {
           name: step.name,
-          environment: pipelineConfig.environment,
         }
       ],
     },
@@ -141,7 +142,6 @@ local __pipelineFactory = {
       buildStep(stepConfig): function (pipelineConfig) [
         {
           name: step.name,
-          environment: pipelineConfig.environment,
           image: pipelineConfig.nodeImage,
           commands:
             [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
@@ -160,7 +160,6 @@ local __pipelineFactory = {
       buildStep(stepConfig): function (pipelineConfig) [
        {
           name: step.name,
-          environment: pipelineConfig.environment,
           image: pipelineConfig.nodeImage,
           commands:
             [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
