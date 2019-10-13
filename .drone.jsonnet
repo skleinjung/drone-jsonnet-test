@@ -81,6 +81,7 @@ local __custom(name, config = {}) = {
 };
 
 local __yarn(name, scripts = [name], config = {}) = {
+  createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
   builder: function (pipelineConfig) [
     config + {
       name: name,
@@ -88,7 +89,6 @@ local __yarn(name, scripts = [name], config = {}) = {
       commands: [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] + std.map(self.createCommand, scripts),
     }
   ],
-  createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
 };
 
 local __pipelineFactory = {
