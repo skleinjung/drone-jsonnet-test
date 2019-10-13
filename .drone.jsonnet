@@ -369,7 +369,7 @@ local __pipelineFactory() = {
 
   createSteps(pipelineConfig):: function (step)
     std.map(
-      __pipelineFactory.withEnvironment(pipelineConfig),
+      pipelineFactory.withEnvironment(pipelineConfig),
       if (std.objectHas(step, 'build')) then step.build(pipelineConfig) else []),
 
   /**
