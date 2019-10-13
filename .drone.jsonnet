@@ -398,9 +398,9 @@ local __pipelineFactory() = {
 //      if std.length(validationErrors) > 0 then
 //        pipelineFactory.createErrorPipeline(config, validationErrors)
 //      else
-        __pipelineFactory.getInitSteps(config) +
-        std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)) +
-        __pipelineFactory.getCompleteNotificationSteps(config),
+        pipelineFactory.getInitSteps(config) +
+        std.flattenArrays(std.map(pipelineFactory.createSteps(config), config.steps)) +
+        pipelineFactory.getCompleteNotificationSteps(config),
 
     trigger: config.trigger,
   },
