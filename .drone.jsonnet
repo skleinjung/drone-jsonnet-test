@@ -29,41 +29,41 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-      steps.publish({
-        // optional, defaults to 'publish'
-        baseStepName: 'publish',
-
-        // optional, defaults to 'master'
-        branch: 'master',
-
-        // optional, defaults to 'release:pre'
-        prereleaseScriptName: 'release:pre',
-        // optional, defaults to 'release:graduate'
-        releaseScriptName: 'release:graduate',
-
-        // optional, defaults to 'NPM_PUBLISH_TOKEN'
-        tokenSecret: 'NPM_PUBLISH_TOKEN',
-
-        // each entry is a prerelease tag/branch names combo
-        configurations: [
-          {
-            branches: ['master'],
-            prerelease: 'alpha',
-          },
-          {
-            branches: ['develop'],
-            prerelease: 'qa',
-            canary: true,
-          },
-          {
-            branches: {
-              exclude: ['master', 'develop'],
-            },
-            prerelease: 'unstable',
-            canary: true,
-          },
-        ],
-      }),
+//      steps.publish({
+//        // optional, defaults to 'publish'
+//        baseStepName: 'publish',
+//
+//        // optional, defaults to 'master'
+//        branch: 'master',
+//
+//        // optional, defaults to 'release:pre'
+//        prereleaseScriptName: 'release:pre',
+//        // optional, defaults to 'release:graduate'
+//        releaseScriptName: 'release:graduate',
+//
+//        // optional, defaults to 'NPM_PUBLISH_TOKEN'
+//        tokenSecret: 'NPM_PUBLISH_TOKEN',
+//
+//        // each entry is a prerelease tag/branch names combo
+//        configurations: [
+//          {
+//            branches: ['master'],
+//            prerelease: 'alpha',
+//          },
+//          {
+//            branches: ['develop'],
+//            prerelease: 'qa',
+//            canary: true,
+//          },
+//          {
+//            branches: {
+//              exclude: ['master', 'develop'],
+//            },
+//            prerelease: 'unstable',
+//            canary: true,
+//          },
+//        ],
+//      }),
     ],
 
 //    notifications: {
@@ -126,30 +126,21 @@ local __initGitHubStep(pipelineConfig) = {
    ],
  };
 
-local __custom(name, config = {}) = {
-  builder: function (pipelineConfig) [
-    config + {
-      name: name,
-    }
-  ],
-};
-
-local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
-local __yarn(name, scripts = [name], config = {}) = {
-  builder: function (pipelineConfig) [
-    config + {
-      name: name,
-      image: pipelineConfig.nodeImage,
-      commands: [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] + std.map(__createCommand, scripts),
-    }
-  ],
-};
-
 local __createPublishStep(image, baseStepName, publishConfig, environment = {}) = function(publish) {
+  local prereleaseScriptName =
+    if std.objectHas(publishConfig, 'prereleaseScriptName')
+    then publishConfig.prereleaseScriptName
+    else 'release:pre',
+
+  local releaseScriptName =
+    if std.objectHas(publishConfig, 'releaseScriptName')
+    then publishConfig.releaseScriptName
+    else 'release:graduate',
+
   local releaseName = if std.objectHas(publish, 'prerelease') then publish.prerelease else 'production',
   local scriptName = if std.objectHas(publish, 'prerelease')
-    then publishConfig.prereleaseScriptName
-    else publishConfig.releaseScriptName,
+    then prereleaseScriptName
+    else releaseScriptName,
   local isCanary = std.objectHas(publish, 'canary') && publish.canary,
 
   name: std.join('-', [baseStepName, releaseName]),
@@ -157,7 +148,7 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
   environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
     ': *** publishing: ' + releaseName,
-    std.join(' ', ['echo', 'yarn', scriptName, if isCanary then '--canary']),
+    std.join(' ', ['yarn', scriptName, if isCanary then '--canary']),
   ],
   when: {
     branch: publish.branches,
@@ -174,21 +165,6 @@ local __publish(publishConfig = {}) = {
     then publishConfig.tokenSecret
     else 'NPM_PUBLISH_TOKEN',
 
-  local prereleaseScriptName =
-    if std.objectHas(publishConfig, 'prereleaseScriptName')
-    then publishConfig.prereleaseScriptName
-    else 'release:pre',
-
-  local releaseScriptName =
-    if std.objectHas(publishConfig, 'releaseScriptName')
-    then publishConfig.releaseScriptName
-    else 'release:graduate',
-
-  local releaseBranch =
-    if std.objectHas(publishConfig, 'branch')
-    then publishConfig.branch
-    else 'master',
-
   builder: function (pipelineConfig)
     (if std.objectHas(publishConfig, 'configurations') then [
       {
@@ -201,12 +177,58 @@ local __publish(publishConfig = {}) = {
         },
       },
     ] else []) +
-    if std.objectHas(publishConfig, 'configurations')
+    (if std.objectHas(publishConfig, 'configurations')
       then std.map(__createPublishStep(
         pipelineConfig.nodeImage,
         baseStepName,
         publishConfig), publishConfig.configurations)
-      else []
+      else []) +
+    (if std.objectHas(publishConfig, 'promotion')
+      then [{
+//        name: std.join('-', ['promote', '${DRONE_DEPLOY_TO}']),
+//          image: pipelineConfig.nodeImage,
+//          environment: pipelineConfig.environment + { RELEASE_TYPE: '${DRONE_DEPLOY_TO}' },
+//          commands: [': *** promoting release to ${DRONE_DEPLOY_TO}']
+//          ],
+      }] else [])
+};
+
+/**
+ * Thrashplay helper library
+ */
+local __t = {
+  execIf(predicate, action, default): if predicate then action() else default
+};
+
+local __customStepBuilder(name, config = {}) = {
+  build: function (pipelineConfig) [
+    config + {
+      name: name,
+    }
+  ],
+};
+
+local __releaseStepBuilder(releaseConfig = {}) = {
+  buildVersionSteps(pipelineConfig)::
+    if !std.objectHas(releaseConfig, 'version')
+      then []
+      else __yarn('tag-version', ['version']).build(pipelineConfig),
+
+  build: function (pipelineConfig)
+    buildVersionSteps(pipelineConfig)
+};
+
+local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
+local __yarnStepBuilder(name, scripts = [name], config = {}) = {
+  build: function (pipelineConfig) [
+    config + {
+      name: name,
+      image: pipelineConfig.nodeImage,
+      commands:
+        [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] +
+        std.map(__createCommand, scripts),
+    }
+  ],
 };
 
 local __pipelineFactory = {
@@ -265,24 +287,12 @@ local __pipelineFactory = {
     __pipelineFactory.getStartNotificationSteps(pipelineConfig) +
     [
       __initGitHubStep(pipelineConfig)
-    ]
-    + if std.objectHas(pipelineConfig, 'npmPublish') then
-    [
-      {
-        name: 'init-npm-auth',
-        image: 'robertstettner/drone-npm-auth',
-        settings: {
-          token: {
-            from_secret: pipelineConfig.npmPublish.tokenSecret,
-          }
-        },
-      }
-    ] else [],
+    ],
 
   createSteps(pipelineConfig):: function (step)
     std.map(
       __pipelineFactory.withEnvironment(pipelineConfig),
-      if (std.objectHas(step, 'builder')) then step.builder(pipelineConfig) else []),
+      if (std.objectHas(step, 'build')) then step.build(pipelineConfig) else []),
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
