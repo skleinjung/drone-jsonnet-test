@@ -387,7 +387,7 @@ local __pipelineFactory = {
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
-    local validationErrors = validateSteps(pipelineConfig, config.steps),
+    local validationErrors = self.validateSteps(pipelineConfig, config.steps),
 
     kind: 'pipeline',
     name: config.name,
