@@ -103,7 +103,7 @@ local __pipelineFactory = {
   createSteps(pipelineConfig):: function (step)
     { environment: pipelineConfig.environment }
     + if (std.objectHas(step, 'builder'))
-        then (if std.objectHas(step, 'config') then step.config else {}) + step.builder(name, pipelineConfig)
+        then (if std.objectHas(step, 'config') then step.config else {}) + step.builder(pipelineConfig)
         else [],
 
   createPipeline(configuration = {}): {
@@ -121,27 +121,26 @@ local __pipelineFactory = {
       getStepConfig(name, config = {}): {
         name: name,
         config: config,
-        builder: __pipelineFactory.configBuilders.custom.buildStep,
+        builder: __pipelineFactory.configBuilders.custom.buildStep(name),
       },
 
       // use provided configuration, without augmenting it
-      buildStep(pipelineConfig): [
+      buildStep(name): function (pipelineConfig) [
         {
-          name: step.name,
+          name: name,
         }
       ],
     },
 
     publish: {
       getStepConfig(name, scripts = [name], config = {}): {
-        name: name,
         config: config,
-        builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }),
+        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }),
       },
 
-      buildStep(stepConfig): function (pipelineConfig) [
+      buildStep(name, stepConfig): function (pipelineConfig) [
         {
-          name: step.name,
+          name: name,
           image: pipelineConfig.nodeImage,
           commands:
             [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
@@ -152,14 +151,13 @@ local __pipelineFactory = {
 
     yarn: {
       getStepConfig(name, scripts = [name], config = {}): {
-        name: name,
         config: config,
         builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }),
       },
 
-      buildStep(stepConfig): function (pipelineConfig) [
+      buildStep(name, stepConfig): function (pipelineConfig) [
        {
-          name: step.name,
+          name: name,
           image: pipelineConfig.nodeImage,
           commands:
             [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
