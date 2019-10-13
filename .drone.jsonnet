@@ -228,7 +228,7 @@ local __releaseStepBuilder(releaseConfig = {}) = {
       else __yarnStepBuilder('tag-version', ['version']).build(pipelineConfig),
 
   build: function (pipelineConfig)
-    buildVersionSteps(pipelineConfig)
+    self.buildVersionSteps(pipelineConfig)
 };
 
 local __pipelineFactory = {
