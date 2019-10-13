@@ -208,16 +208,6 @@ local __customStepBuilder(name, config = {}) = {
   ],
 };
 
-local __releaseStepBuilder(releaseConfig = {}) = {
-  buildVersionSteps(pipelineConfig)::
-    if !std.objectHas(releaseConfig, 'version')
-      then []
-      else __yarnStepBuilder('tag-version', ['version']).build(pipelineConfig),
-
-  build: function (pipelineConfig)
-    buildVersionSteps(pipelineConfig)
-};
-
 local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
 local __yarnStepBuilder(name, scripts = [name], config = {}) = {
   build: function (pipelineConfig) [
@@ -229,6 +219,16 @@ local __yarnStepBuilder(name, scripts = [name], config = {}) = {
         std.map(__createCommand, scripts),
     }
   ],
+};
+
+local __releaseStepBuilder(releaseConfig = {}) = {
+  buildVersionSteps(pipelineConfig)::
+    if !std.objectHas(releaseConfig, 'version')
+      then []
+      else __yarnStepBuilder('tag-version', ['version']).build(pipelineConfig),
+
+  build: function (pipelineConfig)
+    buildVersionSteps(pipelineConfig)
 };
 
 local __pipelineFactory = {
