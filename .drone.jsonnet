@@ -32,8 +32,23 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-      steps.publish('publish', { tokenSecret: 'NPM_PUBLISH_TOKEN' }, {
-        release: ['master'],
+
+      steps.publish({
+        // optional, defaults to 'publish'
+        baseStepName: 'publish',
+
+        // optional, defaults to ['master']
+        branch: ['master'],
+
+        // optional, defaults to 'release:pre'
+        prereleaseScriptName: 'release:pre',
+        // optional, defaults to 'release:graduate'
+        releaseScriptName: 'release:graduate',
+
+        // optional, defaults to 'NPM_PUBLISH_TOKEN'
+        tokenSecret: 'NPM_PUBLISH_TOKEN',
+
+        // each entry is a prerelease tag/branch names combo
         alpha: ['develop'],
         preview: {
           exclude: ['master', 'develop']
@@ -91,18 +106,54 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __publish(name, authConfig, publishConfig) = {
-  builder: function (pipelineConfig) [
-    {
-      name: std.join('-', [name, 'npm-auth']),
-      image: 'robertstettner/drone-npm-auth',
-      settings: {
-        token: {
-          from_secret: authConfig.tokenSecret,
-        }
+local __createReleaseStep(baseName, stepName, scriptName, environment = {}) = {
+  name: std.join('-', [baseStepName, stepName]),
+  image: pipelineConfig.nodeImage,
+  environment: environment,
+  commands: [
+    ': *** publishing - ' + stepName,
+    std.join(' ', ['yarn', scriptName]),
+  ]
+};
+local __publish(publishConfig = {}) = {
+  local baseStepName =
+    if std.objectHas(publishConfig, 'baseStepName')
+    then publishConfigbaseStepName
+    else 'publish',
+
+  local tokenSecret =
+    if std.objectHas(publishConfig, 'tokenSecret')
+    then publishConfig.tokenSecret
+    else 'NPM_PUBLISH_TOKEN',
+
+  local prereleaseScriptName =
+    if std.objectHas(publishConfig, 'prereleaseScriptName')
+    then publishConfig.prereleaseScriptName
+    else ['release:pre'],
+
+  local releaseScriptName =
+    if std.objectHas(publishConfig, 'releaseScriptName')
+    then publishConfig.releaseScriptName
+    else ['release:graduate'],
+
+  local releaseBranch =
+    if std.objectHas(publishConfig, 'branch')
+    then publishConfig.branch
+    else ['master'],
+
+  builder: function (pipelineConfig)
+    [
+      {
+        name: std.join('-', [baseStepName, 'npm-auth']),
+        image: 'robertstettner/drone-npm-auth',
+        settings: {
+          token: {
+            from_secret: tokenSecret,
+          }
+        },
       },
-    }
-  ],
+      __createReleaseStep(baseName, 'release', releaseScriptName)
+    ]
 };
 
 local __pipelineFactory = {
