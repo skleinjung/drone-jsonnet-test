@@ -106,13 +106,13 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __createReleaseStep(baseName, stepName, scriptName, environment = {}) = {
+local __createReleaseStep(baseStepName, stepName, scriptName, environment = {}) = {
   name: std.join('-', [baseStepName, stepName]),
   image: pipelineConfig.nodeImage,
   environment: environment,
   commands: [
     ': *** publishing - ' + stepName,
-    std.join(' ', ['yarn', scriptName]),
+    std.join(' ', ['echo', 'yarn', scriptName]),
   ]
 };
 local __publish(publishConfig = {}) = {
