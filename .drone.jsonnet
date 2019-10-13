@@ -381,9 +381,9 @@ local __pipelineFactory() = {
     __customStepBuilder('log-configuration-errors', {
       image: 'alpine',
       commands: [
-        ': *** There were error(s) in the build pipeline configuration:',
+        ': *** There were errors in the build pipeline configuration:',
         ': '
-      ] + std.map((function(message) ': ' + message), errors)
+      ] + std.map((function(message) ': ' + std.escapeStringBash(message)), errors)
     }).build(pipelineConfig),
 
   createPipeline(configuration = {}): {
