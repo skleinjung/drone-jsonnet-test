@@ -103,7 +103,9 @@ local __pipelineFactory = {
     ] else [],
 
   createSteps(pipelineConfig):: function (step)
-    std.map(withEnvironment(pipelineConfig), if (std.objectHas(step, 'builder')) then step.builder(pipelineConfig) else []),
+    std.map(
+      __pipelineFactory.withEnvironment(pipelineConfig),
+      if (std.objectHas(step, 'builder')) then step.builder(pipelineConfig) else []),
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
