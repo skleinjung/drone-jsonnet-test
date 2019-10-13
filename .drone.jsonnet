@@ -84,6 +84,8 @@ local __pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
+  withEnvironment(step):: step + { environment: pipelineConfig.environment },
+
   getInitSteps(pipelineConfig)::
     [
       __initGitHubStep(pipelineConfig)
@@ -101,10 +103,7 @@ local __pipelineFactory = {
     ] else [],
 
   createSteps(pipelineConfig):: function (step)
-    { environment: pipelineConfig.environment }
-    + if (std.objectHas(step, 'builder'))
-        then step.builder(pipelineConfig)
-        else [],
+    std.map(withEnvironment(pipelineConfig), if (std.objectHas(step, 'builder')) then step.builder(pipelineConfig) else []),
 
   createPipeline(configuration = {}): {
     local config = __pipelineFactory.withDefaults(configuration),
