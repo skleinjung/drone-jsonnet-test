@@ -48,6 +48,7 @@ local createPipelines(steps) = [
         configurations: [
           {
             branches: ['master'],
+            prerelease: 'alpha',
           },
           {
             branches: ['develop'],
