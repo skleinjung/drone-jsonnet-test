@@ -44,14 +44,57 @@ local createPipelines(steps) = [
         tokenSecret: 'NPM_PUBLISH_TOKEN',
 
         // each entry is a prerelease tag/branch names combo
-        prereleases: {
-          alpha: ['develop'],
-          dev: {
-            exclude: ['master', 'develop']
-          }
-        },
+        configurations: [
+          {
+            branches: ['master'],
+            prerelease: 'alpha',
+          },
+          {
+            branches: ['develop'],
+            prerelease: 'qa',
+            canary: true,
+          },
+          {
+            branches: {
+              exclude: ['master', 'develop'],
+            },
+            prerelease: 'unstable',
+            canary: true,
+          },
+        ],
+
       }),
-    ]
+    ],
+
+    notifications: {
+      slack: {
+        webhookSecret: 'SLACK_NOTIFICATION_WEBHOOK',
+        channel: 'deployments',
+
+        startMessage: |||
+          :arrow_forward: Started <https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|{{repo.name}} build #{{build.number}}> on _{{build.branch}}_
+        |||,
+
+        completeMessage: |||
+          {{#success build.status}}
+            :+1: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD SUCCESS: #{{build.number}}>*
+          {{else}}
+            :octagonal_sign: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD FAILURE: #{{build.number}}>*
+          {{/success}}
+
+          Project: *{{repo.name}}*
+          Triggered by: commit to _{{build.branch}}_ (*<https://drone.thrashplay.com/link/thrashplay/{{repo.name}}/commit/{{build.commit}}|{{truncate build.commit 8}}>*)
+
+          ```{{build.message}}```
+        |||
+      },
+    },
+
+    trigger: {
+      event: {
+        include: ['push'],
+      }
+    }
   },
 ];
 
@@ -114,13 +157,18 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, branch, env
     branch: [branch]
   }
 };
-local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, environment = {}) = function(prereleaseName) {
-  name: std.join('-', [baseStepName, 'prerelease', prereleaseName]),
+local __createPublishStep(image, publishConfig, environment = {}) = function(publish) {
+  local releaseName = if std.objectHas(publish, 'prerelease') then publish.prerelease else 'production',
+  local scriptName = if std.objectHas(publish, 'prerelease')
+    then publishConfig.prereleaseScriptName
+    else publishConfig.releaseScriptName,
+
+  name: std.join('-', [baseStepName, 'publish', releaseName]),
   image: image,
-  environment: environment + { PRERELEASE_ID: prereleaseName },
+  environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
-    ': *** publishing pre-release: ' + prereleaseName,
-    std.join(' ', ['yarn', scriptName]),
+    ': *** publishing: ' + releaseName,
+    std.join(' ', ['yarn', scriptName, if publish['canary'] == true then '--canary']),
   ],
   when: {
     branch: prereleaseConfig[prereleaseName]
@@ -153,7 +201,7 @@ local __publish(publishConfig = {}) = {
     else 'master',
 
   builder: function (pipelineConfig)
-    [
+    if std.objectHas(publishConfig, 'configurations') then [
       {
         name: std.join('-', [baseStepName, 'npm-auth']),
         image: 'robertstettner/drone-npm-auth',
@@ -163,14 +211,11 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, releaseBranch),
-    ] +
-    if std.objectHas(publishConfig, 'prereleases')
-      then std.map(__createPrereleaseStep(
-        publishConfig.prereleases,
+    ] else [] +
+    if std.objectHas(publishConfig, 'configurations')
+      then std.map(__createPublishStep(
         pipelineConfig.nodeImage,
-        baseStepName,
-        prereleaseScriptName), std.objectFields(publishConfig.prereleases))
+        publishConfig), publishConfig.configurations)
       else []
 };
 
@@ -184,14 +229,54 @@ local __pipelineFactory = {
     name: if std.objectHas(configuration, 'name') then configuration.name else 'default',
     nodeImage: if std.objectHas(configuration, 'nodeImage') then configuration.nodeImage else 'node:lts',
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
+    trigger: if std.objectHas(configuration, 'trigger') then configuration.trigger else {},
   },
 
   withEnvironment(pipelineConfig):: function (step) { environment: pipelineConfig.environment } + step,
 
+  getStartNotificationSteps(pipelineConfig)::
+    if (std.objectHas(pipelineConfig, 'notifications') && std.objectHas(pipelineConfig.notifications, 'slack') && std.objectHas(pipelineConfig.notifications.slack, 'startMessage'))
+      then [
+        {
+          image: 'plugins/slack',
+          name: 'slack-notify-start',
+          settings: {
+            channel: pipelineConfig.notifications.slack.channel,
+            template: pipelineConfig.notifications.slack.startMessage,
+            webhook: {
+              from_secret: pipelineConfig.notifications.slack.webhookSecret,
+            },
+          }
+        }
+      ]
+      else [],
+
+  getCompleteNotificationSteps(pipelineConfig)::
+    if (std.objectHas(pipelineConfig, 'notifications') && std.objectHas(pipelineConfig.notifications, 'slack') && std.objectHas(pipelineConfig.notifications.slack, 'completeMessage'))
+      then [
+        {
+          image: 'plugins/slack',
+          name: 'slack-notify-complete',
+          settings: {
+            webhook: {
+              from_secret: pipelineConfig.notifications.slack.webhookSecret,
+            },
+            channel: pipelineConfig.notifications.slack.channel,
+            template: pipelineConfig.notifications.slack.completeMessage,
+          },
+          when: {
+            status: [ 'success', 'failure' ]
+          }
+        }
+      ]
+      else [],
+
   getInitSteps(pipelineConfig)::
+    __pipelineFactory.getStartNotificationSteps(pipelineConfig) +
     [
       __initGitHubStep(pipelineConfig)
-    ] + if std.objectHas(pipelineConfig, 'npmPublish') then
+    ]
+    + if std.objectHas(pipelineConfig, 'npmPublish') then
     [
       {
         name: 'init-npm-auth',
@@ -216,7 +301,9 @@ local __pipelineFactory = {
     name: config.name,
     steps:
       __pipelineFactory.getInitSteps(config) +
-      std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)),
+      std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)) +
+      __pipelineFactory.getCompleteNotificationSteps(config),
+    trigger: config.trigger,
   },
 };
 
