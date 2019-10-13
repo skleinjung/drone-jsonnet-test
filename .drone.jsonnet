@@ -404,12 +404,16 @@ local __pipelineFactory() = {
    *   - steps: If the configuration is valid, this is a flattened array of 'step' objects. Otherwise, it will be null.
    */
   createStepsFromBuilders(pipelineConfig, stepBuilders):: {
-    local conditions = {
-      'Builder is missing a "build" method.': !std.objectHas(stepBuilder, build)
+    local conditions(stepBuilder) = {
+      'Builder is missing a "build" method.': !std.objectHas(stepBuilder, 'build')
     },
 
     local stepBuilderErrors = pipelineFactory.validateSteps(pipelineConfig, stepBuilders),
-    local validationErrors = __t.nullIfEmpty(__t.withoutNulls(__validation.validate(conditions) + stepBuilderErrors)),
+    local validationErrors = __t.nullIfEmpty(
+      __t.withoutNulls(
+        std.map((function (stepBuilder) __validation.validate(conditions(stepBuilder))), stepBuilders) + stepBuilderErrors
+      )
+    ),
 
     errors: validationErrors,
     steps: if validationErrors == null
