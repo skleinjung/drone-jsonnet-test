@@ -168,14 +168,14 @@ local __publish(publishConfig = {}) = {
         },
       },
       __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch]),
-      if std.objectHas(pipelineConfig, 'prereleases')
-        then std.map(__createPrereleaseStep(
-          pipelineConfig.prereleases,
-          pipelineConfig.nodeImage,
-          baseStepName,
-          releaseScriptName), pipelineConfig.prereleases)
-        else []
-    ]
+    ] +
+    if std.objectHas(pipelineConfig, 'prereleases')
+      then std.map(__createPrereleaseStep(
+        pipelineConfig.prereleases,
+        pipelineConfig.nodeImage,
+        baseStepName,
+        releaseScriptName), pipelineConfig.prereleases)
+      else []
 };
 
 local __pipelineFactory = {
