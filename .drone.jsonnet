@@ -13,21 +13,21 @@ local configurePipelines(steps) = [
     },
 
     steps: [
-      steps.custom('generic', {
-        image: 'node',
-        commands: ['echo "*** Hello, $${GREETEE_NAME}!"'],
-      }),
-      steps.custom('generic-with-custom-environment', {
-        image: 'node',
-        environment: {
-          GREETEE_NAME: 'generic override',
-        },
-        commands: [
-          'echo "*** Hello, $${GREETEE_NAME}!"'
-        ],
-      }),
-      steps.yarn('install'),
-      steps.yarn('build'),
+//      steps.custom('generic', {
+//        image: 'node',
+//        commands: ['echo "*** Hello, $${GREETEE_NAME}!"'],
+//      }),
+//      steps.custom('generic-with-custom-environment', {
+//        image: 'node',
+//        environment: {
+//          GREETEE_NAME: 'generic override',
+//        },
+//        commands: [
+//          'echo "*** Hello, $${GREETEE_NAME}!"'
+//        ],
+//      }),
+//      steps.yarn('install'),
+//      steps.yarn('build'),
 
 //      steps.publish({
 //        // optional, defaults to 'publish'
@@ -166,7 +166,7 @@ local __t = {
    * function returns null.
    */
   assertAll(conditions):
-    __t.nullIfEmpty(__t.withoutNulls(std.map((function (key) if !conditions[key] then key), conditions))),
+    __t.nullIfEmpty(__t.withoutNulls(std.map((function (key) if !conditions[key] then key), std.objectFields(conditions)))),
 
   withoutNulls(array): std.filter((function(value) value != null), array),
 };
