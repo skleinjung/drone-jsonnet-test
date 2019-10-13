@@ -32,7 +32,29 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-      steps.publish(),
+      steps.publish({
+        // optional, defaults to 'publish'
+        baseStepName: 'publish',
+
+        // optional, defaults to 'master'
+        branch: 'super-cool-release',
+
+        // optional, defaults to 'release:pre'
+        prereleaseScriptName: 'release:pre',
+        // optional, defaults to 'release:graduate'
+        releaseScriptName: 'release:graduate',
+
+        // optional, defaults to 'NPM_PUBLISH_TOKEN'
+        tokenSecret: 'NPM_PUBLISH_TOKEN',
+
+        // each entry is a prerelease tag/branch names combo
+        prereleases: {
+          alpha: ['develop'],
+          dev: {
+            exclude: ['master', 'develop']
+          }
+        },
+      }),
     ]
   },
 ];
@@ -84,7 +106,7 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __createReleaseStep(image, baseStepName, stepName, scriptName, branches, environment = {}) = {
+local __createReleaseStep(image, baseStepName, stepName, scriptName, branch, environment = {}) = {
   name: std.join('-', [baseStepName, stepName]),
   image: image,
   environment: environment,
@@ -93,7 +115,7 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, branches, e
     std.join(' ', ['echo', 'yarn', scriptName]),
   ],
   when: {
-    branch: branches
+    branch: [branches]
   }
 };
 local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, environment = {}) = function(prereleaseName) {
@@ -145,7 +167,7 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch]),
+      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, releaseBranch),
     ] +
     if std.objectHas(pipelineConfig, 'prereleases')
       then std.map(__createPrereleaseStep(
