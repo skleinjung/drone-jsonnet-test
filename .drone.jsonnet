@@ -106,14 +106,17 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __createReleaseStep(image, baseStepName, stepName, scriptName, environment = {}) = {
+local __createReleaseStep(image, baseStepName, stepName, scriptName, branches, environment = {}) = {
   name: std.join('-', [baseStepName, stepName]),
   image: image,
   environment: environment,
   commands: [
     ': *** publishing - ' + stepName,
     std.join(' ', ['echo', 'yarn', scriptName]),
-  ]
+  ],
+  when: {
+    branch: branches
+  }
 };
 local __publish(publishConfig = {}) = {
   local baseStepName =
