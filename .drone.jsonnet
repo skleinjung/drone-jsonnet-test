@@ -302,6 +302,8 @@ local __releaseStepBuilder(releaseConfig = {}) = {
 };
 
 local __pipelineFactory() = {
+  local pipelineFactory = self,
+
   /**
    * Apply default configurations to a pipeline config.
    */
@@ -386,15 +388,15 @@ local __pipelineFactory() = {
   ],
 
   createPipeline(configuration = {}): {
-    local config = self.withDefaults(configuration),
-    local validationErrors = self.validateSteps(config, config.steps),
+    local config = pipelineFactory.withDefaults(configuration),
+    local validationErrors = pipelineFactory.validateSteps(config, config.steps),
 
     kind: 'pipeline',
     name: config.name,
 
     steps:
       if std.length(validationErrors) > 0 then
-        self.createErrorPipeline(config, validationErrors)
+        pipelineFactory.createErrorPipeline(config, validationErrors)
       else
         __pipelineFactory.getInitSteps(config) +
         std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)) +
