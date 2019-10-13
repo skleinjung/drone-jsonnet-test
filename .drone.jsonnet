@@ -393,8 +393,8 @@ local __pipelineFactory = {
     name: config.name,
 
     steps:
-      if std.length(errors) > 0 then
-        createErrorPipeline(config, errors)
+      if std.length(validationErrors) > 0 then
+        createErrorPipeline(config, validationErrors)
       else
         __pipelineFactory.getInitSteps(config) +
         std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)) +
