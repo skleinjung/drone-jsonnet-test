@@ -197,7 +197,8 @@ local __publish(publishConfig = {}) = {
  * Thrashplay helper library
  */
 local __t = {
-  execIf(predicate, action, default): if predicate then action() else default
+  execIf(predicate, action, default): if predicate then action() else default,
+  removeNulls(array): std.filter((function(value) value != null), array),
 };
 
 /**
@@ -364,7 +365,9 @@ local __pipelineFactory() = {
     if std.objectHas(stepBuilder, 'validate') then stepBuilder.validate(pipelineConfig) else [],
 
   validateSteps(pipelineConfig, stepBuilders):
-    std.flattenArrays(std.map(self.validateStep(pipelineConfig), stepBuilders)),
+    __t.removeNulls(
+      std.flattenArrays(
+        std.map(self.validateStep(pipelineConfig), stepBuilders))),
 
   createSteps(pipelineConfig):: function (step)
     std.map(
