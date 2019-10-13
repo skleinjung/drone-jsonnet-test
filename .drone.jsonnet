@@ -11,10 +11,6 @@ local createPipelines(steps) = [
       // defaults to name of last committer
       authorName: 'Mary Sue',
     },
-    // optional
-//    npmPublish: {
-//      tokenSecret: 'NPM_PUBLISH_TOKEN',
-//    },
     steps: [
       steps.custom('generic', {
         image: 'node',
@@ -95,7 +91,7 @@ local __custom(name, config = {}) = {
   ],
 };
 
-local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
+local __createCommand(script) = std.join(' ', ['yarn', script]);
 local __yarn(name, scripts = [name], config = {}) = {
   builder: function (pipelineConfig) [
     config + {
@@ -112,7 +108,7 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, branch, env
   environment: environment,
   commands: [
     ': *** publishing release',
-    std.join(' ', ['echo', 'yarn', scriptName]),
+    std.join(' ', ['yarn', scriptName]),
   ],
   when: {
     branch: [branch]
@@ -124,7 +120,7 @@ local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, 
   environment: environment + { PRERELEASE_ID: prereleaseName },
   commands: [
     ': *** publishing pre-release: ' + prereleaseName,
-    std.join(' ', ['echo', 'yarn', scriptName]),
+    std.join(' ', ['yarn', scriptName]),
   ],
   when: {
     branch: prereleaseConfig[prereleaseName]
