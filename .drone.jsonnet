@@ -152,7 +152,7 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-      __createReleaseStep(pipelineConfig.nodeImage, baseName, 'release', releaseScriptName)
+      __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName)
     ]
 };
 
