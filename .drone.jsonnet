@@ -171,10 +171,10 @@ local __publish(publishConfig = {}) = {
     ] +
     if std.objectHas(pipelineConfig, 'prereleases')
       then std.map(__createPrereleaseStep(
-        pipelineConfig.prereleases,
+        stepConfig.prereleases,
         pipelineConfig.nodeImage,
         baseStepName,
-        releaseScriptName), pipelineConfig.prereleases)
+        releaseScriptName), stepConfig.prereleases)
       else []
 };
 
