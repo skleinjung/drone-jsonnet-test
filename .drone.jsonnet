@@ -86,8 +86,8 @@ local __yarn(name, scripts = [name], config = {}) = {
       name: name,
       image: pipelineConfig.nodeImage,
       commands:
-        [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] +
-        std.map(__yarn.createCommand, scripts),
+        [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']']
+//        std.map(__yarn.createCommand, scripts),
     }
   ],
 
