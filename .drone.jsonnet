@@ -93,7 +93,7 @@ local __yarn(name, scripts = [name], config = {}) = {
 
 local __publish(name, any) = {
   builder: function (pipelineConfig) [
-    defaults + {
+    {
       name: std.join('-', [name, 'npm-auth']),
       image: 'robertstettner/drone-npm-auth',
       settings: {
