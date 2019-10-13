@@ -163,5 +163,5 @@ local __pipelineFactory = {
 std.map(__pipelineFactory.createPipeline, createPipelines({
   custom: __custom,
   publish: __pipelineFactory.configBuilders.custom.publish,
-  yarn: __pipelineFactory.configBuilders.yarn.getStepConfig,
+  yarn: __yarn,
 }))
