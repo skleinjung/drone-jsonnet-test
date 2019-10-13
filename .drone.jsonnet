@@ -1,4 +1,4 @@
-local createPipelines(steps) = [
+local configurePipelines(steps) = [
   {
     // optional, applies to each step
     environment: {
@@ -176,7 +176,24 @@ local __t = {
   castArray(value): if (__t.isArray(value)) then value else [value],
   execIf(predicate, action, default): if predicate then action() else default,
   isArray(value): std.type(value) == 'array',
-  removeNulls(array): std.filter((function(value) value != null), array),
+  nullIfEmpty(array): if std.length(array) == 0 then null else array,
+
+  /**
+   * Validates a set of conditions, returning an array of error messages or null.
+   *
+   * The 'conditions' parameter is an object with arbitrary keys, each is mapped to a boolean value. If any of the
+   * booelean values are false, then the key will be used as a returned error message. If every condition is true, then
+   * function returns null.
+   */
+  validate(conditions):
+    __t.nullIfEmpty(__t.withoutNulls(std.map((function (key) if !conditions[key] then key), conditions))),
+
+  withoutNulls(array): std.filter((function(value) value != null), array),
+};
+
+local __validation = {
+  local _errors = [],
+  logError(message):: errors + [message],
 };
 
 /**
@@ -360,23 +377,14 @@ local __pipelineFactory() = {
       ]
       else [],
 
-  getInitSteps(pipelineConfig)::
-    pipelineFactory.getStartNotificationSteps(pipelineConfig),
-
-  validateStep(pipelineConfig): function (stepBuilder)
-    if std.objectHas(stepBuilder, 'validate')
-      then __t.castArray(stepBuilder.validate(pipelineConfig))
-      else [],
-
   validateSteps(pipelineConfig, stepBuilders):
+    local validateStep(pipelineConfig) = function (stepBuilder)
+      if std.objectHas(stepBuilder, 'validate')
+        then __t.castArray(stepBuilder.validate(pipelineConfig))
+        else [];
     __t.removeNulls(
       std.flattenArrays(
         std.map(self.validateStep(pipelineConfig), stepBuilders))),
-
-  createSteps(pipelineConfig):: function (step)
-    std.map(
-      pipelineFactory.withEnvironment(pipelineConfig),
-      if (std.objectHas(step, 'build')) then step.build(pipelineConfig) else []),
 
   /**
    * Called when one or more steps have invalid configuration, and is supplied
@@ -393,36 +401,61 @@ local __pipelineFactory() = {
       + ['exit 1']
     }).build(pipelineConfig),
 
-  createPipeline(configuration = {}): {
+  /**
+   * Given an array of zero or more builders, attempts to create an array of corresponding steps.
+   *
+   * This methods returns an object with two properties:
+   *   - errors: If the configuration is invalid, this will be an array of messages describing the errors. Otherwise, null.
+   *   - steps: If the configuration is valid, this is a flattened array of 'step' objects. Otherwise, it will be null.
+   */
+  createStepsFromBuilders(pipelineConfig, stepBuilders):: {
+    local conditions = {
+      'Builder is missing a "build" method.': !std.objectHas(stepBuilder, build)
+    },
+
+    local stepBuilderErrors = pipelineFactory.validateSteps(pipelineConfig, stepBuilders),
+    local validationErrors = __t.nullIfEmpty(__t.withoutNulls(__validation.validate(conditions) + stepBuilderErrors)),
+
+    errors: validationErrors,
+    steps: if validationErrors == null
+      then std.map((function (stepBuilder) stepBuilder.build(pipelineConfig)), stepBuilders)
+
+//  createSteps(pipelineConfig):: function (step)
+//    std.map(
+//      pipelineFactory.withEnvironment(pipelineConfig),
+//      if (std.objectHas(step, 'build')) then step.build(pipelineConfig) else []),
+  },
+
+  createPipeline(defaultInitStepBuilders): function (configuration = {}) {
     local config = pipelineFactory.withDefaults(configuration),
-    local validationErrors = pipelineFactory.validateSteps(config, config.steps),
+    local builderResult = pipelineFactory.createStepsFromBuilders(
+      config,
+      defaultInitStepsBuilders + config.steps),
 
     kind: 'pipeline',
     name: config.name,
 
     steps:
-      if std.length(validationErrors) > 0 then
-        pipelineFactory.createErrorSteps(config, validationErrors)
+      if builderResult.errors != null then
+        pipelineFactory.createErrorSteps(config, builderResult.errors)
       else
-        pipelineFactory.getInitSteps(config) +
-        std.flattenArrays(std.map(pipelineFactory.createSteps(config), config.steps)) +
-        pipelineFactory.getCompleteNotificationSteps(config),
+        builderResult.steps,
+        //pipelineFactory.getCompleteNotificationSteps(config),
 
     trigger: config.trigger,
   },
 };
 
-local initStepBuilders = [
+local __defaultInitStepBuilders = [
   __initGitStepBuilder()
 ];
 
-local stepBuilderFactory = {
+local __stepBuilderFactory = {
   custom: __customStepBuilder,
   yarn: __yarnStepBuilder,
 };
 
-std.map(__pipelineFactory().createPipeline,
-  initStepBuilders +
-  createPipelines(stepBuilderFactory)
+std.map(__pipelineFactory().createPipeline(__defaultInitStepBuilders),
+  configurePipelines(__stepBuilderFactory)
 )
 
