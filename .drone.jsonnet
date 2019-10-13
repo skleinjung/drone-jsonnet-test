@@ -48,7 +48,7 @@ local createPipelines(steps) = [
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
-local __initGitHubStep = {
+local __initGitHubStep(pipelineConfig) = {
    local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
    local defaultName = "`git log -1 --pretty=format:'%an'`",
    local authorEmail =
@@ -86,7 +86,7 @@ local __pipelineFactory = {
 
   getInitSteps(pipelineConfig)::
     [
-      __initGitHubStep
+      __initGitHubStep(pipelineConfig)
     ] + if std.objectHas(pipelineConfig, 'npmPublish') then
     [
       {
