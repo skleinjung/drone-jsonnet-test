@@ -66,29 +66,29 @@ local createPipelines(steps) = [
       }),
     ],
 
-    notifications: {
-      slack: {
-        webhookSecret: 'SLACK_NOTIFICATION_WEBHOOK',
-        channel: 'deployments',
-
-        startMessage: |||
-          :arrow_forward: Started <https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|{{repo.name}} build #{{build.number}}> on _{{build.branch}}_
-        |||,
-
-        completeMessage: |||
-          {{#success build.status}}
-            :+1: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD SUCCESS: #{{build.number}}>*
-          {{else}}
-            :octagonal_sign: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD FAILURE: #{{build.number}}>*
-          {{/success}}
-
-          Project: *{{repo.name}}*
-          Triggered by: commit to _{{build.branch}}_ (*<https://drone.thrashplay.com/link/thrashplay/{{repo.name}}/commit/{{build.commit}}|{{truncate build.commit 8}}>*)
-
-          ```{{build.message}}```
-        |||
-      },
-    },
+//    notifications: {
+//      slack: {
+//        webhookSecret: 'SLACK_NOTIFICATION_WEBHOOK',
+//        channel: 'deployments',
+//
+//        startMessage: |||
+//          :arrow_forward: Started <https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|{{repo.name}} build #{{build.number}}> on _{{build.branch}}_
+//        |||,
+//
+//        completeMessage: |||
+//          {{#success build.status}}
+//            :+1: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD SUCCESS: #{{build.number}}>*
+//          {{else}}
+//            :octagonal_sign: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD FAILURE: #{{build.number}}>*
+//          {{/success}}
+//
+//          Project: *{{repo.name}}*
+//          Triggered by: commit to _{{build.branch}}_ (*<https://drone.thrashplay.com/link/thrashplay/{{repo.name}}/commit/{{build.commit}}|{{truncate build.commit 8}}>*)
+//
+//          ```{{build.message}}```
+//        |||
+//      },
+//    },
 
     trigger: {
       event: {
