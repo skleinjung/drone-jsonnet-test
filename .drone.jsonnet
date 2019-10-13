@@ -121,7 +121,7 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, branches, e
 local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, environment = {}) = function(prereleaseName) {
   name: std.join('-', [baseStepName, 'prerelease', prereleaseName]),
   image: image,
-  environment: environment + { PRERELEASE_ID: preleaseName },
+  environment: environment + { PRERELEASE_ID: prereleaseName },
   commands: [
     ': *** publishing pre-release: ' + prereleaseName,
     std.join(' ', ['echo', 'yarn', scriptName]),
