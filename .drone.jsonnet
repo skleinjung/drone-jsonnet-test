@@ -84,7 +84,7 @@ local __pipelineFactory = {
     steps: if std.objectHas(configuration, 'steps') then configuration.steps else [],
   },
 
-  withEnvironment(pipelineConfig):: function (step) step + { environment: pipelineConfig.environment },
+  withEnvironment(pipelineConfig):: function (step) { environment: pipelineConfig.environment } + step,
 
   getInitSteps(pipelineConfig)::
     [
