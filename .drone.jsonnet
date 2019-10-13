@@ -13,11 +13,12 @@ local createPipelines(steps) = [
     },
 
     steps: [
-      steps.custom(null, {
+      steps.custom('generic', {
         image: 'node',
         commands: ['echo "*** Hello, $${GREETEE_NAME}!"'],
       }),
       steps.custom('generic-with-custom-environment', {
+        image: 'node',
         environment: {
           GREETEE_NAME: 'generic override',
         },
