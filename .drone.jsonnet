@@ -364,7 +364,7 @@ local __pipelineFactory() = {
   validateStep(pipelineConfig): function (stepBuilder)
     if std.objectHas(stepBuilder, 'validate') then stepBuilder.validate(pipelineConfig) else [],
 
-  validateSteps(pipelineConfig, stepBuilders)::
+  validateSteps(pipelineConfig, stepBuilders):
     std.flattenArrays(std.map(self.validateStep(pipelineConfig), stepBuilders)),
 
   createSteps(pipelineConfig):: function (step)
