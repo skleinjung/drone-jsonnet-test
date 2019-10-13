@@ -188,7 +188,7 @@ local __publish(publishConfig = {}) = {
     else 'master',
 
   builder: function (pipelineConfig)
-    if std.objectHas(publishConfig, 'configurations') then [
+    (if std.objectHas(publishConfig, 'configurations') then [
       {
         name: std.join('-', [baseStepName, 'npm-auth']),
         image: 'robertstettner/drone-npm-auth',
@@ -198,13 +198,13 @@ local __publish(publishConfig = {}) = {
           }
         },
       },
-    ] else [] +
-//    if std.objectHas(publishConfig, 'configurations')
-      std.map(__createPublishStep(
+    ] else []) +
+    if std.objectHas(publishConfig, 'configurations')
+      then std.map(__createPublishStep(
         pipelineConfig.nodeImage,
         baseStepName,
         publishConfig), publishConfig.configurations)
-//      else []
+      else []
 };
 
 local __pipelineFactory = {
