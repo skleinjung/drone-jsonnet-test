@@ -154,7 +154,7 @@ local __pipelineFactory = {
       },
 
       buildStep(name, stepConfig): function (pipelineConfig, defaults) [
-        default + {
+        defaults + {
           name: name,
           image: pipelineConfig.nodeImage,
           commands:
