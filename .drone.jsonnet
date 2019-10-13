@@ -218,7 +218,7 @@ local __yarnStepBuilder(name, scripts = [name], config = {}) = {
       commandCreator(createCommand)::
         [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] +
         std.map(createCommand, scripts),
-      commands: commandCreator(self.createCommand)
+      commands: self.commandCreator(self.createCommand)
     }
   ],
 };
