@@ -32,13 +32,13 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-//      steps.publish('publish', {
-//        release: ['master'],
-//        alpha: ['develop'],
-//        preview: {
-//          exclude: ['master', 'develop']
-//        }
-//      }),
+      steps.publish('publish', {
+        release: ['master'],
+        alpha: ['develop'],
+        preview: {
+          exclude: ['master', 'develop']
+        }
+      }),
     ]
   },
 ];
@@ -91,7 +91,7 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __publish(name, scripts = [name], defaults = {}) = {
+local __publish(name, any) = {
   builder: function (pipelineConfig) [
     defaults + {
       name: std.join('-', [name, 'npm-auth']),
