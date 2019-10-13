@@ -73,12 +73,23 @@ local __initGitHubStep(pipelineConfig) = {
  };
 
 local __custom(name, config = {}) = {
-  name: name,
   builder: function (pipelineConfig) [
     config + {
       name: name,
     }
   ],
+};
+
+local __yarn(name, scripts = [name], config = {}) = {
+  builder: function (pipelineConfig) [
+    config + {
+      name: name,
+      image: pipelineConfig.nodeImage,
+      commands:
+        [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
+        std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
+    }
+  ]
 };
 
 local __pipelineFactory = {
@@ -145,23 +156,7 @@ local __pipelineFactory = {
       ],
     },
 
-    yarn: {
-      getStepConfig(name, scripts = [name], config = {}): {
-        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }, config),
-      },
 
-      buildStep(name, stepConfig, defaults): function (pipelineConfig) [
-        defaults + {
-          name: name,
-          image: pipelineConfig.nodeImage,
-          commands:
-            [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
-            std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
-        }
-      ],
-
-      createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
-    },
   },
 };
 
