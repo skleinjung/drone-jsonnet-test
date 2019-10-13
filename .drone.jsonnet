@@ -91,6 +91,20 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
+local __publish(name, scripts = [name], defaults = {}) = {
+  builder: function (pipelineConfig) [
+    defaults + {
+      name: std.join('-', [name, 'npm-auth']),
+      image: 'robertstettner/drone-npm-auth',
+      settings: {
+        token: {
+          from_secret: pipelineConfig.npmPublish.tokenSecret,
+        }
+      },
+    }
+  ],
+};
+
 local __pipelineFactory = {
   /**
    * Apply default configurations to a pipeline config.
@@ -135,32 +149,10 @@ local __pipelineFactory = {
       __pipelineFactory.getInitSteps(config) +
       std.flattenArrays(std.map(__pipelineFactory.createSteps(config), config.steps)),
   },
-
-  configBuilders:: {
-
-
-    publish: {
-      getStepConfig(name, scripts = [name], config = {}): {
-        builder: __pipelineFactory.configBuilders.yarn.buildStep(name, { scripts: scripts }, config),
-      },
-
-      buildStep(name, stepConfig, defaults): function (pipelineConfig) [
-        defaults + {
-          name: name,
-          image: pipelineConfig.nodeImage,
-          commands:
-            [': *** yarn -- running commands: [' + std.join(', ', stepConfig.scripts) + ']'] +
-            std.map(__pipelineFactory.configBuilders.yarn.createCommand, stepConfig.scripts),
-        }
-      ],
-    },
-
-
-  },
 };
 
 std.map(__pipelineFactory.createPipeline, createPipelines({
   custom: __custom,
-  publish: __pipelineFactory.configBuilders.custom.publish,
+  publish: __publish,
   yarn: __yarn,
 }))
