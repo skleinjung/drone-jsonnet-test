@@ -159,7 +159,7 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
     std.join(' ', ['yarn', scriptName, if publish['canary'] == true then '--canary']),
   ],
   when: {
-    branch: prereleaseConfig[prereleaseName]
+    branch: publish[prereleaseName]
   }
 };
 local __publish(publishConfig = {}) = {
