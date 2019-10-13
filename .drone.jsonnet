@@ -212,7 +212,7 @@ local __releaseStepBuilder(releaseConfig = {}) = {
   buildVersionSteps(pipelineConfig)::
     if !std.objectHas(releaseConfig, 'version')
       then []
-      else __yarn('tag-version', ['version']).build(pipelineConfig),
+      else __yarnStepBuilder('tag-version', ['version']).build(pipelineConfig),
 
   build: function (pipelineConfig)
     buildVersionSteps(pipelineConfig)
@@ -308,7 +308,6 @@ local __pipelineFactory = {
 };
 
 std.map(__pipelineFactory.createPipeline, createPipelines({
-  custom: __custom,
-  publish: __publish,
-  yarn: __yarn,
+  custom: __customStepBuilder,
+  yarn: __yarnStepBuilder,
 }))
