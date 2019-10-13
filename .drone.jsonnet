@@ -281,21 +281,21 @@ local __releaseStepBuilder(releaseConfig = {}) = {
 };
 
 local __initGitStepBuilder() = {
-  local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
-  local defaultName = "`git log -1 --pretty=format:'%an'`",
-  local authorEmail =
-    if std.objectHas(pipelineConfig, 'git') then
-      if std.objectHas(pipelineConfig.git, 'authorEmail') then pipelineConfig.git.authorEmail else defaultEmail
-    else
-      defaultEmail,
-
-  local authorName =
-    if std.objectHas(pipelineConfig, 'git') then
-      if std.objectHas(pipelineConfig.git, 'authorName') then pipelineConfig.git.authorName else defaultName
-    else
-      defaultName,
-
   build: function (pipelineConfig) {
+    local defaultEmail = "`git log -1 --pretty=format:'%ae'`",
+    local defaultName = "`git log -1 --pretty=format:'%an'`",
+    local authorEmail =
+      if std.objectHas(pipelineConfig, 'git') then
+        if std.objectHas(pipelineConfig.git, 'authorEmail') then pipelineConfig.git.authorEmail else defaultEmail
+      else
+        defaultEmail,
+
+    local authorName =
+      if std.objectHas(pipelineConfig, 'git') then
+        if std.objectHas(pipelineConfig.git, 'authorName') then pipelineConfig.git.authorName else defaultName
+      else
+        defaultName,
+
     name: 'init-git',
     image: 'alpine/git',
     commands: [
@@ -361,10 +361,7 @@ local __pipelineFactory() = {
       else [],
 
   getInitSteps(pipelineConfig)::
-    pipelineFactory.getStartNotificationSteps(pipelineConfig) +
-    [
-      __initGitHubStep(pipelineConfig)
-    ],
+    pipelineFactory.getStartNotificationSteps(pipelineConfig),
 
   validateStep(pipelineConfig): function (stepBuilder)
     if std.objectHas(stepBuilder, 'validate')
