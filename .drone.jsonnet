@@ -47,7 +47,7 @@ local createPipelines(steps) = [
         // optional, defaults to 'NPM_PUBLISH_TOKEN'
         tokenSecret: 'NPM_PUBLISH_TOKEN',
 
-        // each entry is a prerelease tag/branch-names combo
+        // each entry is a prerelease tag/branch names combo
         prereleases: {
           alpha: ['develop'],
           dev: {
@@ -169,12 +169,12 @@ local __publish(publishConfig = {}) = {
       },
       __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, releaseBranch),
     ] +
-    if std.objectHas(pipelineConfig, 'prereleases')
+    if std.objectHas(publishConfig, 'prereleases')
       then std.map(__createPrereleaseStep(
         publishConfig.prereleases,
         pipelineConfig.nodeImage,
         baseStepName,
-        releaseScriptName), publishConfig.prereleases)
+        prereleaseScriptName), std.objectFields(publishConfig.prereleases))
       else []
 };
 
