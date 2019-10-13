@@ -118,7 +118,7 @@ local __createReleaseStep(image, baseStepName, stepName, scriptName, environment
 local __publish(publishConfig = {}) = {
   local baseStepName =
     if std.objectHas(publishConfig, 'baseStepName')
-    then publishConfigbaseStepName
+    then publishConfigbase.baseStepName
     else 'publish',
 
   local tokenSecret =
