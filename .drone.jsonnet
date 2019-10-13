@@ -11,10 +11,7 @@ local createPipelines(steps) = [
       // defaults to name of last committer
       authorName: 'Mary Sue',
     },
-    // optional
-//    npmPublish: {
-//      tokenSecret: 'NPM_PUBLISH_TOKEN',
-//    },
+
     steps: [
       steps.custom('generic', {
         image: 'node',
