@@ -124,7 +124,7 @@ local __pipelineFactory = {
       },
 
       // use provided configuration, without augmenting it
-      buildStep(name, config): function (pipelineConfig, config) [
+      buildStep(name, config): function (pipelineConfig) [
         config + {
           name: name,
         }
@@ -152,7 +152,7 @@ local __pipelineFactory = {
         builder: __pipelineFactory.configBuilders.yarn.buildStep({ scripts: scripts }, config),
       },
 
-      buildStep(name, stepConfig): function (pipelineConfig, defaults) [
+      buildStep(name, stepConfig): function (pipelineConfig) [
         defaults + {
           name: name,
           image: pipelineConfig.nodeImage,
