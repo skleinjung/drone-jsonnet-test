@@ -80,13 +80,13 @@ local __custom(name, config = {}) = {
   ],
 };
 
+local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
 local __yarn(name, scripts = [name], config = {}) = {
-  createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
   builder: function (pipelineConfig) [
     config + {
       name: name,
       image: pipelineConfig.nodeImage,
-      commands: [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] + std.map(__yarn.createCommand, scripts),
+      commands: [': *** yarn -- running commands: [' + std.join(', ', scripts) + ']'] + std.map(__createCommand, scripts),
     }
   ],
 };
