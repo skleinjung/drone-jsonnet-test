@@ -411,7 +411,7 @@ local __pipelineFactory() = {
     local stepBuilderErrors = pipelineFactory.validateSteps(pipelineConfig, stepBuilders),
     local validationErrors = __t.nullIfEmpty(
       __t.withoutNulls(
-        std.map((function (stepBuilder) __validation.validate(conditions(stepBuilder))), stepBuilders) + stepBuilderErrors
+        std.map((function (stepBuilder) __t.validate(conditions(stepBuilder))), stepBuilders) + stepBuilderErrors
       )
     ),
 
