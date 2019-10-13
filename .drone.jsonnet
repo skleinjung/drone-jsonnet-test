@@ -191,11 +191,6 @@ local __t = {
   withoutNulls(array): std.filter((function(value) value != null), array),
 };
 
-local __validation = {
-  local _errors = [],
-  logError(message):: errors + [message],
-};
-
 /**
  * PipelineConfiguration
  *
