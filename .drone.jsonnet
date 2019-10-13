@@ -126,6 +126,9 @@ local __createPrereleaseStep(prereleaseConfig, image, baseStepName, scriptName, 
     ': *** publishing pre-release: ' + prereleaseName,
     std.join(' ', ['echo', 'yarn', scriptName]),
   ],
+  when: {
+    branch: prereleaseConfig[prereleaseName]
+  }
 };
 local __publish(publishConfig = {}) = {
   local baseStepName =
@@ -166,12 +169,12 @@ local __publish(publishConfig = {}) = {
       },
       __createReleaseStep(pipelineConfig.nodeImage, baseStepName, 'release', releaseScriptName, [releaseBranch]),
     ] +
-    if std.objectHas(pipelineConfig, 'prereleases')
+    if std.objectHas(publishConfig, 'prereleases')
       then std.map(__createPrereleaseStep(
-        pipelineConfig.prereleases,
+        publishConfig.prereleases,
         pipelineConfig.nodeImage,
         baseStepName,
-        releaseScriptName), std.objectFields(pipelineConfig.prereleases))
+        releaseScriptName), std.objectFields(publishConfig.prereleases))
       else []
 };
 
