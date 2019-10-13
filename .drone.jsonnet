@@ -134,7 +134,7 @@ local __custom(name, config = {}) = {
   ],
 };
 
-local __createCommand(script) = std.join(' ', ['yarn', script]);
+local __createCommand(script) = std.join(' ', ['echo', 'yarn', script]);
 local __yarn(name, scripts = [name], config = {}) = {
   builder: function (pipelineConfig) [
     config + {
@@ -156,7 +156,7 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
   environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
     ': *** publishing: ' + releaseName,
-    std.join(' ', ['yarn', scriptName, if publish['canary'] == true then '--canary']),
+    std.join(' ', ['echo', 'yarn', scriptName, if publish['canary'] == true then '--canary']),
   ],
   when: {
     branch: publish.branches,
