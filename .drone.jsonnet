@@ -72,14 +72,9 @@ local __initGitHubStep(pipelineConfig) = {
    ],
  };
 
-local __custom = {
-  getStepConfig(name, config = {}): {
-    name: name,
-    builder: __custom.buildStep(name, config),
-  },
-
-  // use provided configuration, without augmenting it
-  buildStep(name, config): function (pipelineConfig) [
+local __custom(name, config = {}) = {
+  name: name,
+  builder: function (pipelineConfig) [
     config + {
       name: name,
     }
