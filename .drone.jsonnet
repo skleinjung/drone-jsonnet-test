@@ -301,7 +301,7 @@ local __releaseStepBuilder(releaseConfig = {}) = {
     self.buildVersionSteps(pipelineConfig)
 };
 
-local __pipelineFactory = {
+local __pipelineFactory() = {
   /**
    * Apply default configurations to a pipeline config.
    */
@@ -404,7 +404,7 @@ local __pipelineFactory = {
   },
 };
 
-std.map(__pipelineFactory.createPipeline, createPipelines({
+std.map(__pipelineFactory().createPipeline, createPipelines({
   custom: __customStepBuilder,
   yarn: __yarnStepBuilder,
 }))
