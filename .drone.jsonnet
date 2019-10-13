@@ -32,7 +32,7 @@ local createPipelines(steps) = [
       steps.yarn('install'),
       steps.yarn('build'),
 
-      steps.publish('publish', {
+      steps.publish('publish', { tokenSecret: 'NPM_PUBLISH_TOKEN' }, {
         release: ['master'],
         alpha: ['develop'],
         preview: {
@@ -91,14 +91,14 @@ local __yarn(name, scripts = [name], config = {}) = {
   ],
 };
 
-local __publish(name, any) = {
+local __publish(name, authConfig, publishConfig) = {
   builder: function (pipelineConfig) [
     {
       name: std.join('-', [name, 'npm-auth']),
       image: 'robertstettner/drone-npm-auth',
       settings: {
         token: {
-          from_secret: pipelineConfig.npmPublish.tokenSecret,
+          from_secret: authConfig.tokenSecret,
         }
       },
     }
