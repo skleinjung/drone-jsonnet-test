@@ -66,30 +66,6 @@ local configurePipelines(steps) = [
 //      }),
     ],
 
-//    notifications: {
-//      slack: {
-//        webhookSecret: 'SLACK_NOTIFICATION_WEBHOOK',
-//        channel: 'deployments',
-//
-//        startMessage: |||
-//          :arrow_forward: Started <https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|{{repo.name}} build #{{build.number}}> on _{{build.branch}}_
-//        |||,
-//
-//        completeMessage: |||
-//          {{#success build.status}}
-//            :+1: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD SUCCESS: #{{build.number}}>*
-//          {{else}}
-//            :octagonal_sign: *<https://drone.thrashplay.com/thrashplay/{{repo.name}}/{{build.number}}|BUILD FAILURE: #{{build.number}}>*
-//          {{/success}}
-//
-//          Project: *{{repo.name}}*
-//          Triggered by: commit to _{{build.branch}}_ (*<https://drone.thrashplay.com/link/thrashplay/{{repo.name}}/commit/{{build.commit}}|{{truncate build.commit 8}}>*)
-//
-//          ```{{build.message}}```
-//        |||
-//      },
-//    },
-
     trigger: {
       event: {
         include: ['push'],
@@ -175,6 +151,10 @@ local __publish(publishConfig = {}) = {
 local __t = {
   castArray(value): if (__t.isArray(value)) then value else [value],
   execIf(predicate, action, default): if predicate then action() else default,
+  hasNonEmptyArray(container, propertyName):
+    std.objectHas(container, propertyName)
+      && __t.isArray(container[propertyName])
+      && std.length(container[propertyName]) > 0,
   isArray(value): std.type(value) == 'array',
   nullIfEmpty(array): if std.length(array) == 0 then null else array,
 
@@ -185,7 +165,7 @@ local __t = {
    * booelean values are false, then the key will be used as a returned error message. If every condition is true, then
    * function returns null.
    */
-  validate(conditions):
+  assertAll(conditions):
     __t.nullIfEmpty(__t.withoutNulls(std.map((function (key) if !conditions[key] then key), conditions))),
 
   withoutNulls(array): std.filter((function(value) value != null), array),
@@ -379,7 +359,7 @@ local __pipelineFactory() = {
         else [];
     __t.withoutNulls(
       std.flattenArrays(
-        std.map(self.validateStep(pipelineConfig), stepBuilders))),
+        std.map(validateStep(pipelineConfig), stepBuilders))),
 
   /**
    * Called when one or more steps have invalid configuration, and is supplied
@@ -405,15 +385,13 @@ local __pipelineFactory() = {
    */
   createStepsFromBuilders(pipelineConfig, stepBuilders):: {
     local conditions(stepBuilder) = {
-      'Builder is missing a "build" method.': !std.objectHas(stepBuilder, 'build')
+      'Builder is missing a "build" method.': std.objectHas(stepBuilder, 'build')
     },
 
+    local getValidationErrors(stepBuilder) = __t.assertAll(conditions(stepBuilder)),
     local stepBuilderErrors = pipelineFactory.validateSteps(pipelineConfig, stepBuilders),
     local validationErrors = __t.nullIfEmpty(
-      __t.withoutNulls(
-        std.map((function (stepBuilder) __t.validate(conditions(stepBuilder))), stepBuilders) + stepBuilderErrors
-      )
-    ),
+      __t.withoutNulls(std.map(getValidationErrors, stepBuilders) + stepBuilderErrors)),
 
     errors: validationErrors,
     steps: if validationErrors == null
@@ -427,10 +405,13 @@ local __pipelineFactory() = {
 
   createPipeline(defaultInitStepBuilders): function (configuration = {}) {
     local config = pipelineFactory.withDefaults(configuration),
-    local builderResult = pipelineFactory.createStepsFromBuilders(
-      config,
-      //defaultInitStepBuilders +
-      config.steps),
+    local errors = __t.assertAll({
+      ["Pipeline '" + config.name + "' did not have any steps."]: __t.hasNonEmptyArray(config, 'steps'),
+    }),
+
+    local builderResult = if errors != null
+      then { errors: errors, steps: null }
+      else pipelineFactory.createStepsFromBuilders(config, defaultInitStepBuilders + config.steps),
 
     kind: 'pipeline',
     name: config.name,
@@ -455,7 +436,10 @@ local __stepBuilderFactory = {
   yarn: __yarnStepBuilder,
 };
 
-std.map(__pipelineFactory().createPipeline(__defaultInitStepBuilders),
-  configurePipelines(__stepBuilderFactory)
-)
+local obj = [
+{
+    myKey: 2,
+}];
+local a = std.trace("obj content: %s" % [obj], obj);
+std.map(__pipelineFactory().createPipeline(__defaultInitStepBuilders), configurePipelines(__stepBuilderFactory))
 
