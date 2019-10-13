@@ -150,6 +150,7 @@ local __createPublishStep(image, baseStepName, publishConfig, environment = {}) 
     then publishConfig.prereleaseScriptName
     else publishConfig.releaseScriptName,
 
+  name: std.join('-', [baseStepName, 'publish', releaseName]),
   image: image,
   environment: environment + if std.objectHas(publish, 'prerelease') then { PRERELEASE_ID: publish.prerelease } else {},
   commands: [
@@ -199,10 +200,7 @@ local __publish(publishConfig = {}) = {
       },
     ] else [] +
     if std.objectHas(publishConfig, 'configurations')
-      then std.map(__createPublishStep(
-        pipelineConfig.nodeImage,
-        baseStepName,
-        publishConfig), publishConfig.configurations)
+      then [{ name: '@#%@#%@#%@#%' }]
       else []
 };
 
