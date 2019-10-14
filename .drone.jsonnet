@@ -1,7 +1,4 @@
-local configurePipelines(steps, options) = [
-  local when = options.when;
-  local env = options.environment;
-
+local configurePipelines(steps, when, env) = [
   {
     // optional, applies to each step
     environment: {
@@ -56,6 +53,7 @@ local configurePipelines(steps, options) = [
 ];
 
 // !!! BEGIN AUTO-GENERATED CONFIGURATION !!!
+// !!! [TPD/DSL] v0.1.0-alpha.0
 // !!! The following content is not meant to be edited by hand
 // !!! Changes below this line may be overwritten by generators in thrashplay-app-creators
 
@@ -493,5 +491,5 @@ local __stepBuilderFactory = {
 
 std.map(
   __pipelineFactory().createPipeline(__defaultPrePipelineStepBuilders, __defaultPostPipelineStepBuilders),
-  configurePipelines(__stepBuilderFactory, __optionsFactory))
+  configurePipelines(__stepBuilderFactory, __optionsFactory.when, __optionsFactory.env))
 
