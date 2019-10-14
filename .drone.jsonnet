@@ -467,16 +467,18 @@ local __defaultPostPipelineStepBuilders = [];
 
 local __optionsFactory = {
   when(branch = null, cron = null, event = null, instance = null, ref = null, repo = null, trigger = null, status = null, target = null): {
+    local wrapString(value) = if (std.isString(value)) then __.castArray(value) else value,
+
     when: {
-      [if branch != null then 'branch']: __.castArray(branch),
-      [if cron != null then 'cron']: cron,
-      [if event != null then 'event']: event,
-      [if instance != null then 'instance']: instance,
-      [if ref != null then 'ref']: ref,
-      [if repo != null then 'repo']: repo,
-      [if trigger != null then 'trigger']: trigger,
-      [if status != null then 'status']: status,
-      [if target != null then 'target']: target,
+      [if branch != null then 'branch']: wrapString(branch),
+      [if cron != null then 'cron']: wrapString(cron),
+      [if event != null then 'event']: wrapString(event),
+      [if instance != null then 'instance']: wrapString(instance),
+      [if ref != null then 'ref']: wrapString(ref),
+      [if repo != null then 'repo']: wrapString(repo),
+      [if trigger != null then 'trigger']: wrapString(trigger),
+      [if status != null then 'status']: wrapString(status),
+      [if target != null then 'target']: wrapString(target),
     }
   },
 
