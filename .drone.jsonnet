@@ -42,13 +42,13 @@ local configurePipelines(steps, options) = [
       steps.plugin('test-webhook', 'plugins/webhook', { urls: 'https://webhook.site/f1afff89-a5b9-4ebb-86b3-71cbfb731531' }),
 
       steps.yarn('generic'),
-      steps.yarn('build') + when(branch = 'master', trigger = { exclude: 'push'}),
+      steps.yarn('build'),// + when(branch = 'master', trigger = { exclude: 'push'}),
 
       steps.release({
         npmTokenSecret: 'SUPER_SECRET',
         version: ['yarn version:prerelease --preid next'],
         publish: ['yarn publish:tagged --dist-tag next'],
-      }) + when(branch = 'master') + env({ DEPLOY_SECRET_THINGY: 'value' })
+      }) //+ when(branch = 'master') + env({ DEPLOY_SECRET_THINGY: 'value' })
     ],
 
     trigger: {
