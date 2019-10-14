@@ -241,7 +241,7 @@ local __pluginBuilder(name = null, image = null, settings = {}, extraConfig = {}
  */
 local __yarnStepBuilder(name, commands = [name], config = {}) = {
   local yarnStepBuilder = self,
-  createCommand(script):: std.join(' ', ['echo', 'yarn', script]),
+  createCommand(script):: std.join(' ', ['yarn', script]),
 
   validate: function (pipelineConfig)
     __.assertAll({
@@ -356,8 +356,8 @@ local __initGitStepBuilder() = {
     image: 'alpine/git',
     commands: [
       ': *** Initializing git user information...',
-      'git config --local user.email ' + std.escapeStringBash(authorEmail) + '',
-      'git config --local user.name ' + std.escapeStringBash(authorName) + '',
+      'git config --local user.email ' + authorEmail + '',
+      'git config --local user.name ' + authorName + '',
     ]
   },
 };
@@ -491,5 +491,5 @@ local __stepBuilderFactory = {
 
 std.map(
   __pipelineFactory().createPipeline(__defaultPrePipelineStepBuilders, __defaultPostPipelineStepBuilders),
-  configurePipelines(__stepBuilderFactory, __optionsFactory.when, __optionsFactory.env))
+  configurePipelines(__stepBuilderFactory, __optionsFactory.when, __optionsFactory.env, __ ))
 
