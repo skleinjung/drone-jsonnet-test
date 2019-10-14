@@ -67,6 +67,7 @@ local configurePipelines(steps, options) = [
  * Thrashplay helper library
  */
 local __ = {
+  castArray(value): if (std.isArray(value)) then value else [value],
   execIf(predicate, action, default): if predicate then action() else default,
 
   /**
@@ -467,7 +468,7 @@ local __defaultPostPipelineStepBuilders = [];
 local __optionsFactory = {
   when(branch = null, cron = null, event = null, instance = null, ref = null, repo = null, trigger = null, status = null, target = null): {
     when: {
-      [if branch != null then 'branch']: branch,
+      [if branch != null then 'branch']: __.castArray(branch),
       [if cron != null then 'cron']: cron,
       [if event != null then 'event']: event,
       [if instance != null then 'instance']: instance,
