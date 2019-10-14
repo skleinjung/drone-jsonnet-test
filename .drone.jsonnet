@@ -33,12 +33,9 @@ local configurePipelines(steps, options) = [
 //        .when(branch = 'master', trigger = { exclude: 'push'})
 //        .ignoreFailure()
 
-      steps.custom('generic-with-custom-environment', 'node', 'echo "*** Hello, $${GREETEE_NAME}!"', {
-        environment: {
-          GREETEE_NAME: 'generic override',
-        }
-      }),
 
+
+      steps.plugin('test-webhook', 'plugins/webhook', { urls: 'https://webhook.site/f1afff89-a5b9-4ebb-86b3-71cbfb731531' }),
 
       steps.yarn('generic'),
       steps.yarn('build'),// + when(branch = 'master', trigger = { exclude: 'push'}),
