@@ -1,23 +1,13 @@
-local when(branch, cron, event, instance, ref, repo, trigger, status, target) = {
-  when: {
-    [if branch != null then 'branch']: branch,
-    [if cron != null then 'cron']: cron,
-    [if event != null then 'event']: event,
-    [if instance != null then 'instance']: instance,
-    [if ref != null then 'ref']: ref,
-    [if repo != null then 'repo']: repo,
-    [if trigger != null then 'trigger']: trigger,
-    [if status != null then 'status']: status,
-    [if target != null then 'target']: target,
-  }
-};
+local configurePipelines(steps, options) = [
+  local when = options.when;
+  local env = options.environment;
 
-local configurePipelines(add) = [
   {
     // optional, applies to each step
     environment: {
       GREETEE_NAME: 'default name',
     },
+
     // optional
     git: {
       // defaults to email of last commmitter
@@ -32,33 +22,33 @@ local configurePipelines(add) = [
     },
 
     steps: [
-      add.slack('Hello, world!'),
+      steps.slack('Hello, world!'),
 
-      add.custom(
-          name = 'adf',
-          image = "node",
-          commands = ['echo "*** Hello, $${GREETEE_NAME}!"'])
+      steps.custom(
+        name = 'adf',
+        image = "node",
+        commands = ['echo "*** Hello, $${GREETEE_NAME}!"']),
+
 //        .environment({ DATA: 'value' })
 //        .when(branch = 'master', trigger = { exclude: 'push'})
 //        .ignoreFailure()
-          ,
 
-      add.custom('generic-with-custom-environment', 'node', 'echo "*** Hello, $${GREETEE_NAME}!"')
-//        .environment({
-//          GREETEE_NAME: 'generic override',
-//        })
-          ,
+      steps.custom('generic-with-custom-environment', 'node', 'echo "*** Hello, $${GREETEE_NAME}!"', {
+        environment: {
+          GREETEE_NAME: 'generic override',
+        }
+      }),
 
-      add.plugin('test-webhook', 'plugins/webhook', { urls: 'https://webhook.site/f1afff89-a5b9-4ebb-86b3-71cbfb731531' }),
+      steps.plugin('test-webhook', 'plugins/webhook', { urls: 'https://webhook.site/f1afff89-a5b9-4ebb-86b3-71cbfb731531' }),
 
-      add.yarn('generic'),
-      add.yarn('build'),
+      steps.yarn('generic'),
+      steps.yarn('build') + when(branch = 'master', trigger = { exclude: 'push'}),
 
-      add.release({
+      steps.release({
         npmTokenSecret: 'SUPER_SECRET',
         version: ['yarn version:prerelease --preid next'],
         publish: ['yarn publish:tagged --dist-tag next'],
-      }),//, when(branch = ['master']))
+      }) + when(branch = 'master') + env({ DEPLOY_SECRET_THINGY: 'value' })
     ],
 
     trigger: {
@@ -151,6 +141,9 @@ local __defaultPipelineConfiguration = {
    * Defines environment variables that will be injected into every step.
    */
   environment: {},
+
+  /** write docs */
+  git: null,
 
   /**
    * Name of the pipeline
@@ -324,6 +317,14 @@ local __slackStepBuilder(message = null, stepName = 'slack', channelOverride = n
     ).build(pipelineConfig)
 };
 
+/**
+ * Builds the steps needed to perform release (i.e. version and publish) tasks. Takes a configuration object, with the
+ * the following values:
+ *
+ * - npmTokenSecret: the name of the Drone secret with the NPM publish token; required if 'publish' is specified
+ * - publish: the list of Yarn commands to run when publishing
+ * - version: the list of Yarn commands to run when versioning
+ */
 local __releaseStepBuilder(releaseConfig = {}) = {
   local hasVersionConfig() = !__.isNullOrEmpty(__.get(releaseConfig, 'version')),
   local hasPublishConfig() = !__.isNullOrEmpty(__.get(releaseConfig, 'publish')),
@@ -344,9 +345,13 @@ local __releaseStepBuilder(releaseConfig = {}) = {
       if (hasPublishConfig()) then __npmAuthStepBuilder(npmTokenSecret).build(pipelineConfig),
       buildVersionSteps(),
       buildPublishSteps()
-    ])
+    ]),
 };
 
+/**
+ * Builds a step that initializes the Git author name and email. If the PipelineConfiguration has a 'git' property,
+ * it's values will be used. Otherwise, the identity of the last committer (the one triggering this build) wil be used.
+ */
 local __initGitStepBuilder() = {
   build: function (pipelineConfig) {
     local authorEmail = __.get(pipelineConfig, 'git.authorEmail', '`git log -1 --pretty=format:"%ae"`'),
@@ -364,43 +369,6 @@ local __initGitStepBuilder() = {
 
 local __pipelineFactory() = {
   local pipelineFactory = self,
-
-  getStartNotificationSteps(pipelineConfig)::
-    if (std.objectHas(pipelineConfig, 'notifications') && std.objectHas(pipelineConfig.notifications, 'slack') && std.objectHas(pipelineConfig.notifications.slack, 'startMessage'))
-      then [
-        {
-          image: 'plugins/slack',
-          name: 'slack-notify-start',
-          settings: {
-            channel: pipelineConfig.notifications.slack.channel,
-            template: pipelineConfig.notifications.slack.startMessage,
-            webhook: {
-              from_secret: pipelineConfig.notifications.slack.webhookSecret,
-            },
-          }
-        }
-      ]
-      else [],
-
-  getCompleteNotificationSteps(pipelineConfig)::
-    if (std.objectHas(pipelineConfig, 'notifications') && std.objectHas(pipelineConfig.notifications, 'slack') && std.objectHas(pipelineConfig.notifications.slack, 'completeMessage'))
-      then [
-        {
-          image: 'plugins/slack',
-          name: 'slack-notify-complete',
-          settings: {
-            webhook: {
-              from_secret: pipelineConfig.notifications.slack.webhookSecret,
-            },
-            channel: pipelineConfig.notifications.slack.channel,
-            template: pipelineConfig.notifications.slack.completeMessage,
-          },
-          when: {
-            status: [ 'success', 'failure' ]
-          }
-        }
-      ]
-      else [],
 
   /**
    * Called when one or more steps have invalid configuration, and is supplied
@@ -437,10 +405,6 @@ local __pipelineFactory() = {
     std.foldl(validateStep, stepBuilders, []),
 
   /**
-   * Constructs a step from a (previo
-   */
-
-  /**
    * Given an array of zero or more builders, attempts to create an array of corresponding steps.
    *
    * This methods returns an object with two properties:
@@ -448,6 +412,17 @@ local __pipelineFactory() = {
    *   - steps: If the configuration is valid, this is a flattened array of 'step' objects. Otherwise, it will be null.
    */
   createStepsFromBuilders(pipelineConfig, stepBuilders):: {
+    local decorate(decorator, value) = if (std.isArray(value)) then std.map(decorator, value) else decorator(value),
+    local environment = { environment: pipelineConfig.environment },
+    local getExtraOptions(stepBuilder) = __.get(stepBuilder, 'extraOptions', {}),
+    local addOptionsToStep(stepBuilder) = function (step)
+      step +
+        { environment: (__.get(step, 'environment', {}) + __.get(stepBuilder, 'extraEnvironment', {})) } +
+        { when: (__.get(step, 'when', {}) + __.get(stepBuilder, 'when', {})) },
+    local withExtraOptions(stepBuilder, steps) = decorate(addOptionsToStep(stepBuilder), steps),
+    local withEnvironment(steps) = decorate((function (step) environment + step), steps),
+    local buildStep(stepBuilder) = withExtraOptions(stepBuilder, withEnvironment(stepBuilder.build(pipelineConfig))),
+
     local errorMessages =
       __.nullIfEmpty(
         __.join([
@@ -455,7 +430,7 @@ local __pipelineFactory() = {
           pipelineFactory.getStepBuilderValidationErrors(pipelineConfig, stepBuilders)
         ])),
 
-    local addSteps(accumulator, stepBuilder) = __.join([accumulator, stepBuilder.build(pipelineConfig)]),
+    local addSteps(accumulator, stepBuilder) = __.join([accumulator, buildStep(stepBuilder)]),
     errors: errorMessages,
     steps: if errorMessages == null then std.foldl(addSteps, stepBuilders, []),
   },
@@ -489,6 +464,26 @@ local __pipelineFactory() = {
 local __defaultPrePipelineStepBuilders = [__initGitStepBuilder()];
 local __defaultPostPipelineStepBuilders = [];
 
+local __optionsFactory = {
+  when(branch = null, cron = null, event = null, instance = null, ref = null, repo = null, trigger = null, status = null, target = null): {
+    when: {
+      [if branch != null then 'branch']: branch,
+      [if cron != null then 'cron']: cron,
+      [if event != null then 'event']: event,
+      [if instance != null then 'instance']: instance,
+      [if ref != null then 'ref']: ref,
+      [if repo != null then 'repo']: repo,
+      [if trigger != null then 'trigger']: trigger,
+      [if status != null then 'status']: status,
+      [if target != null then 'target']: target,
+    }
+  },
+
+  environment(environment): {
+    extraEnvironment: environment
+  },
+};
+
 local __stepBuilderFactory = {
   custom: __customStepBuilder,
   plugin: __pluginBuilder,
@@ -499,5 +494,5 @@ local __stepBuilderFactory = {
 
 std.map(
   __pipelineFactory().createPipeline(__defaultPrePipelineStepBuilders, __defaultPostPipelineStepBuilders),
-  configurePipelines(__stepBuilderFactory))
+  configurePipelines(__stepBuilderFactory, __optionsFactory))
 
