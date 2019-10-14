@@ -24,7 +24,24 @@ local configurePipelines(steps, options) = [
     steps: [
       steps.slack('Hello, world!'),
 
+      steps.custom(
+        name = 'adf',
+        image = "node",
+        commands = ['echo "*** Hello, $${GREETEE_NAME}!"']),
 
+//        .environment({ DATA: 'value' })
+//        .when(branch = 'master', trigger = { exclude: 'push'})
+//        .ignoreFailure()
+
+      steps.custom('generic-with-custom-environment', 'node', 'echo "*** Hello, $${GREETEE_NAME}!"', {
+        environment: {
+          GREETEE_NAME: 'generic override',
+        }
+      }),
+
+
+      steps.yarn('generic'),
+      steps.yarn('build'),// + when(branch = 'master', trigger = { exclude: 'push'}),
 
       steps.release({
         npmTokenSecret: 'SUPER_SECRET',
