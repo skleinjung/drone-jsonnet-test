@@ -25,6 +25,12 @@ local configurePipelines(steps, options) = [
       steps.slack('Hello, world!'),
 
 
+
+      steps.release({
+        npmTokenSecret: 'SUPER_SECRET',
+        version: ['yarn version:prerelease --preid next'],
+        publish: ['yarn publish:tagged --dist-tag next'],
+      }) //+ when(branch = 'master') + env({ DEPLOY_SECRET_THINGY: 'value' })
     ],
 
     trigger: {
